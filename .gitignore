@@ -1,8 +1,8 @@
 # Dependencies
 node_modules/
 
-# Build output
-dist/
+# Build output (tracked for Cloudflare Pages static deployment)
+# dist/
 
 # IDE
 .vscode/
