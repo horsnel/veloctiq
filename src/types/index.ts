@@ -1,5 +1,13 @@
 // VELOCTIQ - Type Definitions
 
+// Feature Result
+export interface FeatureResult {
+  success: boolean;
+  data: any;
+  source: 'browser' | 'api' | 'cache';
+  featureId: string;
+}
+
 // Token System
 export interface TokenPackage {
   id: string;

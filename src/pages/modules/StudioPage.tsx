@@ -1,144 +1,149 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useFeatureStore, useTokenStore } from '@/stores';
-import { aiService } from '@/services/AIService';
-import { webLLMService } from '@/services/WebLLMService';
-import { mockStudioData } from '@/lib/mockData';
+import { featureEngine, type FeatureResult } from '@/services/FeatureEngine';
+import { FeatureResultPanel } from '@/components/FeatureResultPanel';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { ContentCalendar } from '@/components/calendar/ContentCalendar';
-import { cn } from '@/lib/utils';
 
-import { 
-  Clapperboard, 
-  Video, 
+import {
+  Clapperboard,
   Image as ImageIcon,
   Type,
   Play,
-  CheckCircle,
   Wand2,
   Sparkles,
   TrendingUp,
   Hash,
   Cpu,
-  Loader2
+  Loader2,
 } from 'lucide-react';
 
 export function StudioPage() {
   const { getFeaturesByCategory } = useFeatureStore();
-  const { spendTokens, getFreeAnalysesRemaining } = useTokenStore();
+  const { spendTokens } = useTokenStore();
   const features = getFeaturesByCategory('studio');
-  const [activeTab, setActiveTab] = useState('queue');
-  
-  // AI Feature states
-  const [contentInput, setContentInput] = useState('');
-  const [platform, setPlatform] = useState('instagram');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [viralResult, setViralResult] = useState<any>(null);
-  const [hashtagResult, setHashtagResult] = useState<any>(null);
-  const [optimizationResult, setOptimizationResult] = useState<any>(null);
-  const [aiSource, setAiSource] = useState<'groq' | 'browser' | 'webllm'>('browser');
+  const [activeTab, setActiveTab] = useState('overview');
 
-  const handleRunFeature = (featureId: string, cost: number, name: string) => {
+  // Input fields
+  const [architectTopic, setArchitectTopic] = useState('content creation for creators');
+  const [architectPlatform, setArchitectPlatform] = useState('youtube');
+  const [seoContent, setSeoContent] = useState('How to grow on YouTube as a beginner creator in 2024');
+  const [seoPlatform, setSeoPlatform] = useState('youtube');
+  const [titleInput, setTitleInput] = useState('My Content Creation Process');
+  const [titlePlatform, setTitlePlatform] = useState('youtube');
+  const [hashtagContent, setHashtagContent] = useState('');
+  const [hashtagPlatform, setHashtagPlatform] = useState('instagram');
+
+  // Running states
+  const [runningFeatures, setRunningFeatures] = useState<Record<string, boolean>>({});
+
+  // Result states
+  const [overviewResults, setOverviewResults] = useState<Record<string, FeatureResult>>({});
+  const [featureResults, setFeatureResults] = useState<Record<string, FeatureResult>>({});
+  const [aiSource, setAiSource] = useState<string>('browser');
+
+  const isLoading = useCallback(
+    (featureId: string) => runningFeatures[featureId] === true,
+    [runningFeatures]
+  );
+
+  // Run overview features on load
+  useEffect(() => {
+    const loadOverview = async () => {
+      const ids = ['f79', 'f84', 'f92'];
+      setRunningFeatures((prev) => {
+        const next = { ...prev };
+        ids.forEach((id) => { next[id] = true; });
+        return next;
+      });
+
+      const [architectResult, seoResult, titleResult] = await Promise.all([
+        featureEngine.executeFeature('f79', { topic: 'content creation for creators', platform: 'youtube' }),
+        featureEngine.executeFeature('f84', { content: 'How to grow on YouTube as a beginner creator in 2024', platform: 'youtube' }),
+        featureEngine.executeFeature('f92', { title: 'My Content Creation Process', platform: 'youtube' }),
+      ]);
+
+      setOverviewResults({
+        f79: architectResult,
+        f84: seoResult,
+        f92: titleResult,
+      });
+      setAiSource(architectResult.source);
+      setRunningFeatures((prev) => {
+        const next = { ...prev };
+        ids.forEach((id) => { next[id] = false; });
+        return next;
+      });
+    };
+    loadOverview();
+  }, []);
+
+  const executeFeature = async (featureId: string, input: Record<string, unknown> = {}) => {
+    setRunningFeatures((prev) => ({ ...prev, [featureId]: true }));
+    try {
+      const result = await featureEngine.executeFeature(featureId, input);
+      setFeatureResults((prev) => ({ ...prev, [featureId]: result }));
+      setAiSource(result.source);
+      if (result.success) {
+        toast.success(`Feature ${featureId} completed!`);
+      } else {
+        toast.error(`Feature ${featureId} returned an error.`);
+      }
+      return result;
+    } catch {
+      toast.error(`Feature ${featureId} failed.`);
+      return null;
+    } finally {
+      setRunningFeatures((prev) => ({ ...prev, [featureId]: false }));
+    }
+  };
+
+  const handleRunFeature = async (featureId: string, cost: number, name: string, input: Record<string, unknown> = {}) => {
     const success = spendTokens(cost, featureId, `Used ${name}`);
-    if (success) {
-      toast.success(`${name} completed successfully!`);
-    } else {
+    if (!success) {
       toast.error('Insufficient VQT balance. Please purchase more tokens.');
-    }
-  };
-
-  // AI-powered viral prediction
-  const runViralCheck = async () => {
-    if (!contentInput.trim()) {
-      toast.error('Please enter content to analyze');
       return;
     }
-
-    const freeRemaining = getFreeAnalysesRemaining();
-    if (freeRemaining === 0) {
-      const success = spendTokens(3, 'f21', 'Viral Prediction');
-      if (!success) {
-        toast.error('Insufficient VQT balance');
-        return;
-      }
-    }
-
-    setIsAnalyzing(true);
-    try {
-      const result = await aiService.predictViralPotential(contentInput, platform);
-      setViralResult(result.data);
-      setAiSource(result.source as 'groq' | 'browser' | 'webllm');
-      toast.success(`Viral analysis complete! ${freeRemaining > 0 ? `(${freeRemaining - 1} free analyses left)` : ''}`);
-    } catch (error) {
-      toast.error('Analysis failed. Using fallback...');
-      const fallback = await webLLMService.generateResponse(`viral prediction for: ${contentInput}`);
-      setViralResult({ response: fallback.text });
-      setAiSource('webllm');
-    }
-    setIsAnalyzing(false);
+    await executeFeature(featureId, input);
   };
 
-  // AI-powered hashtag generation
-  const runHashtagGen = async () => {
-    if (!contentInput.trim()) {
-      toast.error('Please enter content to analyze');
+  const runContentArchitect = () => {
+    if (!architectTopic.trim()) {
+      toast.error('Please enter a topic');
       return;
     }
-
-    const freeRemaining = getFreeAnalysesRemaining();
-    if (freeRemaining === 0) {
-      const success = spendTokens(2, 'f22', 'Hashtag Recommendations');
-      if (!success) {
-        toast.error('Insufficient VQT balance');
-        return;
-      }
-    }
-
-    setIsAnalyzing(true);
-    try {
-      const result = await aiService.recommendHashtags(contentInput, 15);
-      setHashtagResult(result.data);
-      setAiSource(result.source as 'groq' | 'browser' | 'webllm');
-      toast.success(`Hashtags generated! ${freeRemaining > 0 ? `(${freeRemaining - 1} free analyses left)` : ''}`);
-    } catch (error) {
-      const fallback = webLLMService.generateHashtagSet(platform);
-      setHashtagResult({ hashtags: fallback });
-      setAiSource('webllm');
-    }
-    setIsAnalyzing(false);
+    handleRunFeature('f79', 0, 'Content Architect', { topic: architectTopic, platform: architectPlatform });
   };
 
-  // AI-powered content optimization
-  const runOptimization = async () => {
-    if (!contentInput.trim()) {
-      toast.error('Please enter content to analyze');
+  const runSeoGenerator = () => {
+    if (!seoContent.trim()) {
+      toast.error('Please enter content for SEO generation');
       return;
     }
+    handleRunFeature('f84', 0, 'SEO Meta Generator', { content: seoContent, platform: seoPlatform });
+  };
 
-    const freeRemaining = getFreeAnalysesRemaining();
-    if (freeRemaining === 0) {
-      const success = spendTokens(3, 'f44', 'Content Optimization');
-      if (!success) {
-        toast.error('Insufficient VQT balance');
-        return;
-      }
+  const runTitleOptimizer = () => {
+    if (!titleInput.trim()) {
+      toast.error('Please enter a title to optimize');
+      return;
     }
+    handleRunFeature('f92', 0, 'Title Optimizer', { title: titleInput, platform: titlePlatform });
+  };
 
-    setIsAnalyzing(true);
-    try {
-      const result = await aiService.optimizeContent(contentInput, platform);
-      setOptimizationResult(result.data);
-      setAiSource(result.source as 'groq' | 'browser' | 'webllm');
-      toast.success(`Optimization complete! ${freeRemaining > 0 ? `(${freeRemaining - 1} free analyses left)` : ''}`);
-    } catch (error) {
-      toast.error('Optimization failed');
+  const runHashtagExtractor = () => {
+    if (!hashtagContent.trim()) {
+      toast.error('Please enter content for hashtag extraction');
+      return;
     }
-    setIsAnalyzing(false);
+    handleRunFeature('f93', 0, 'Hashtag & Keyword Extractor', { content: hashtagContent, platform: hashtagPlatform });
   };
 
   return (
@@ -167,7 +172,7 @@ export function StudioPage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="bg-[#F6F7F9]">
-          <TabsTrigger value="queue">Content Queue</TabsTrigger>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="calendar">Calendar</TabsTrigger>
           <TabsTrigger value="ai-tools">AI Tools</TabsTrigger>
           <TabsTrigger value="thumbnails">Thumbnails</TabsTrigger>
@@ -175,368 +180,404 @@ export function StudioPage() {
           <TabsTrigger value="features">Features</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="queue" className="space-y-4">
-          <Card className="border-[#E5E7EB]">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-[#0B0F19] flex items-center gap-2">
-                <Video className="w-5 h-5 text-[#EC4899]" />
-                Content Pipeline
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {mockStudioData.contentQueue.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between p-4 rounded-xl bg-[#F6F7F9]"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-[#EC4899]/10 flex items-center justify-center">
-                        <Video className="w-5 h-5 text-[#EC4899]" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-[#0B0F19]">{item.title}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="secondary" className="text-xs">{item.platform}</Badge>
-                          {item.scheduledTime && (
-                            <span className="text-xs text-[#6B7280]">
-                              Scheduled: {new Date(item.scheduledTime).toLocaleDateString()}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <Badge 
-                      className={`
-                        ${item.status === 'Ready to Publish' ? 'bg-[#00D4AA]/10 text-[#00D4AA]' : 
-                          item.status === 'Editing' ? 'bg-[#F59E0B]/10 text-[#F59E0B]' : 
-                          'bg-[#6B7280]/10 text-[#6B7280]'}
-                        border-none
-                      `}
-                    >
-                      {item.status}
-                    </Badge>
+        {/* Overview Tab - runs features on load */}
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Card className="border-[#E5E7EB]">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-[#EC4899]/10 flex items-center justify-center">
+                    <Clapperboard className="w-5 h-5 text-[#EC4899]" />
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  <div>
+                    <p className="text-xs text-[#6B7280]">Content Architect</p>
+                    <p className="text-sm font-bold text-[#EC4899]">f79</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-[#E5E7EB]">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-[#00D4AA]/10 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-[#00D4AA]" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#6B7280]">SEO Meta Generator</p>
+                    <p className="text-sm font-bold text-[#00D4AA]">f84</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-[#E5E7EB]">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-[#F59E0B]/10 flex items-center justify-center">
+                    <Type className="w-5 h-5 text-[#F59E0B]" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-[#6B7280]">Title Optimizer</p>
+                    <p className="text-sm font-bold text-[#F59E0B]">f92</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Overview Results */}
+          <div className="space-y-4">
+            {isLoading('f79') && (
+              <Card className="border-[#E5E7EB]">
+                <CardContent className="p-6 flex items-center justify-center">
+                  <Loader2 className="w-5 h-5 animate-spin text-[#EC4899] mr-2" />
+                  <span className="text-sm text-[#6B7280]">Running Content Architect...</span>
+                </CardContent>
+              </Card>
+            )}
+            {overviewResults.f79 && !isLoading('f79') && (
+              <FeatureResultPanel
+                result={overviewResults.f79}
+                featureId="f79"
+                featureName="Content Architect"
+                source={overviewResults.f79.source}
+              />
+            )}
+
+            {isLoading('f84') && (
+              <Card className="border-[#E5E7EB]">
+                <CardContent className="p-6 flex items-center justify-center">
+                  <Loader2 className="w-5 h-5 animate-spin text-[#00D4AA] mr-2" />
+                  <span className="text-sm text-[#6B7280]">Running SEO Meta Generator...</span>
+                </CardContent>
+              </Card>
+            )}
+            {overviewResults.f84 && !isLoading('f84') && (
+              <FeatureResultPanel
+                result={overviewResults.f84}
+                featureId="f84"
+                featureName="SEO Meta Generator"
+                source={overviewResults.f84.source}
+              />
+            )}
+
+            {isLoading('f92') && (
+              <Card className="border-[#E5E7EB]">
+                <CardContent className="p-6 flex items-center justify-center">
+                  <Loader2 className="w-5 h-5 animate-spin text-[#F59E0B] mr-2" />
+                  <span className="text-sm text-[#6B7280]">Running Title Optimizer...</span>
+                </CardContent>
+              </Card>
+            )}
+            {overviewResults.f92 && !isLoading('f92') && (
+              <FeatureResultPanel
+                result={overviewResults.f92}
+                featureId="f92"
+                featureName="Title Optimizer"
+                source={overviewResults.f92.source}
+              />
+            )}
+          </div>
         </TabsContent>
 
+        {/* Calendar Tab */}
         <TabsContent value="calendar" className="space-y-4">
           <ContentCalendar />
         </TabsContent>
 
+        {/* AI Tools Tab */}
         <TabsContent value="ai-tools" className="space-y-4">
           <Card className="border-[#E5E7EB]">
             <CardHeader>
               <CardTitle className="text-lg font-semibold text-[#0B0F19] flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-[#EC4899]" />
-                AI Content Analysis
+                AI Content Studio
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Content Architect */}
+              <div className="space-y-3">
+                <h4 className="font-medium text-[#0B0F19] flex items-center gap-2">
+                  <Clapperboard className="w-4 h-4 text-[#EC4899]" />
+                  Content Architect (f79)
+                </h4>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm text-[#6B7280]">Topic</Label>
+                    <Input
+                      placeholder="Enter your content topic..."
+                      value={architectTopic}
+                      onChange={(e) => setArchitectTopic(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm text-[#6B7280]">Platform</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {['youtube', 'instagram', 'tiktok', 'twitter', 'linkedin'].map((p) => (
+                        <Button
+                          key={p}
+                          size="sm"
+                          variant={architectPlatform === p ? 'default' : 'outline'}
+                          onClick={() => setArchitectPlatform(p)}
+                          className={architectPlatform === p ? 'bg-[#EC4899]' : ''}
+                        >
+                          {p.charAt(0).toUpperCase() + p.slice(1)}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  onClick={runContentArchitect}
+                  disabled={isLoading('f79') || !architectTopic.trim()}
+                  className="bg-[#EC4899] hover:bg-[#EC4899]/90 gap-2"
+                >
+                  {isLoading('f79') ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                  Run Content Architect
+                </Button>
+                {featureResults.f79 && (
+                  <FeatureResultPanel
+                    result={featureResults.f79}
+                    featureId="f79"
+                    featureName="Content Architect"
+                    source={featureResults.f79.source}
+                  />
+                )}
+              </div>
+
+              {/* SEO Meta Generator */}
+              <div className="space-y-3 pt-4 border-t border-[#E5E7EB]">
+                <h4 className="font-medium text-[#0B0F19] flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-[#00D4AA]" />
+                  SEO Meta Generator (f84)
+                </h4>
+                <div className="space-y-2">
+                  <Label className="text-sm text-[#6B7280]">Content Description</Label>
+                  <Textarea
+                    placeholder="Describe your content for SEO metadata generation..."
+                    value={seoContent}
+                    onChange={(e) => setSeoContent(e.target.value)}
+                    className="min-h-[80px]"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm text-[#6B7280]">Platform</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {['youtube', 'instagram', 'tiktok', 'twitter', 'linkedin'].map((p) => (
+                      <Button
+                        key={p}
+                        size="sm"
+                        variant={seoPlatform === p ? 'default' : 'outline'}
+                        onClick={() => setSeoPlatform(p)}
+                        className={seoPlatform === p ? 'bg-[#00D4AA]' : ''}
+                      >
+                        {p.charAt(0).toUpperCase() + p.slice(1)}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <Button
+                  onClick={runSeoGenerator}
+                  disabled={isLoading('f84') || !seoContent.trim()}
+                  variant="outline"
+                  className="gap-2 border-[#00D4AA] text-[#00D4AA] hover:bg-[#00D4AA]/10"
+                >
+                  {isLoading('f84') ? <Loader2 className="w-4 h-4 animate-spin" /> : <TrendingUp className="w-4 h-4" />}
+                  Generate SEO Meta
+                </Button>
+                {featureResults.f84 && (
+                  <FeatureResultPanel
+                    result={featureResults.f84}
+                    featureId="f84"
+                    featureName="SEO Meta Generator"
+                    source={featureResults.f84.source}
+                  />
+                )}
+              </div>
+
+              {/* Hashtag & Keyword Extractor */}
+              <div className="space-y-3 pt-4 border-t border-[#E5E7EB]">
+                <h4 className="font-medium text-[#0B0F19] flex items-center gap-2">
+                  <Hash className="w-4 h-4 text-[#6366F1]" />
+                  Hashtag & Keyword Extractor (f93)
+                </h4>
+                <div className="space-y-2">
+                  <Label className="text-sm text-[#6B7280]">Content</Label>
+                  <Textarea
+                    placeholder="Paste your content to extract hashtags and keywords..."
+                    value={hashtagContent}
+                    onChange={(e) => setHashtagContent(e.target.value)}
+                    className="min-h-[80px]"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm text-[#6B7280]">Platform</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {['instagram', 'tiktok', 'youtube', 'twitter', 'linkedin'].map((p) => (
+                      <Button
+                        key={p}
+                        size="sm"
+                        variant={hashtagPlatform === p ? 'default' : 'outline'}
+                        onClick={() => setHashtagPlatform(p)}
+                        className={hashtagPlatform === p ? 'bg-[#6366F1]' : ''}
+                      >
+                        {p.charAt(0).toUpperCase() + p.slice(1)}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <Button
+                  onClick={runHashtagExtractor}
+                  disabled={isLoading('f93') || !hashtagContent.trim()}
+                  variant="outline"
+                  className="gap-2 border-[#6366F1] text-[#6366F1] hover:bg-[#6366F1]/10"
+                >
+                  {isLoading('f93') ? <Loader2 className="w-4 h-4 animate-spin" /> : <Hash className="w-4 h-4" />}
+                  Extract Hashtags & Keywords
+                </Button>
+                {featureResults.f93 && (
+                  <FeatureResultPanel
+                    result={featureResults.f93}
+                    featureId="f93"
+                    featureName="Hashtag & Keyword Extractor"
+                    source={featureResults.f93.source}
+                  />
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Thumbnails Tab */}
+        <TabsContent value="thumbnails" className="space-y-4">
+          <Card className="border-[#E5E7EB]">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-[#0B0F19] flex items-center gap-2">
+                <ImageIcon className="w-5 h-5 text-[#EC4899]" />
+                Thumbnail A/B Test Predictor (f91)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Content Input */}
+              <p className="text-sm text-[#6B7280]">
+                Upload thumbnail variants to predict which will perform better. The AI analyzes visual elements, composition, and engagement patterns.
+              </p>
+              <Button
+                onClick={() => handleRunFeature('f91', 0, 'Thumbnail A/B Test', { variants: { a: 'variant_a', b: 'variant_b' } })}
+                disabled={isLoading('f91')}
+                className="bg-[#EC4899] hover:bg-[#EC4899]/90 gap-2"
+              >
+                {isLoading('f91') ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+                Run Thumbnail Predictor
+              </Button>
+              {featureResults.f91 && (
+                <FeatureResultPanel
+                  result={featureResults.f91}
+                  featureId="f91"
+                  featureName="Thumbnail A/B Test Predictor"
+                  source={featureResults.f91.source}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Title Optimizer Tab */}
+        <TabsContent value="titles" className="space-y-4">
+          <Card className="border-[#E5E7EB]">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-[#0B0F19] flex items-center gap-2">
+                <Type className="w-5 h-5 text-[#EC4899]" />
+                Title Optimizer (f92)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-[#0B0F19]">Your Content</label>
-                <Textarea
-                  placeholder="Paste your caption, post content, or video description here..."
-                  value={contentInput}
-                  onChange={(e) => setContentInput(e.target.value)}
-                  className="min-h-[120px]"
+                <Label className="text-sm text-[#6B7280]">Original Title</Label>
+                <Input
+                  placeholder="Enter your video or post title..."
+                  value={titleInput}
+                  onChange={(e) => setTitleInput(e.target.value)}
                 />
               </div>
-
-              {/* Platform Selection */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-[#0B0F19]">Platform</label>
+                <Label className="text-sm text-[#6B7280]">Platform</Label>
                 <div className="flex flex-wrap gap-2">
-                  {['instagram', 'tiktok', 'youtube', 'twitter', 'linkedin'].map((p) => (
+                  {['youtube', 'instagram', 'tiktok', 'twitter', 'linkedin'].map((p) => (
                     <Button
                       key={p}
                       size="sm"
-                      variant={platform === p ? 'default' : 'outline'}
-                      onClick={() => setPlatform(p)}
-                      className={platform === p ? 'bg-[#EC4899]' : ''}
+                      variant={titlePlatform === p ? 'default' : 'outline'}
+                      onClick={() => setTitlePlatform(p)}
+                      className={titlePlatform === p ? 'bg-[#EC4899]' : ''}
                     >
                       {p.charAt(0).toUpperCase() + p.slice(1)}
                     </Button>
                   ))}
                 </div>
               </div>
-
-              {/* AI Action Buttons */}
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  onClick={runViralCheck}
-                  disabled={isAnalyzing || !contentInput.trim()}
-                  className="bg-[#EC4899] hover:bg-[#EC4899]/90 gap-2"
-                >
-                  {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <TrendingUp className="w-4 h-4" />}
-                  Viral Check (3 VQT)
-                </Button>
-                <Button
-                  onClick={runHashtagGen}
-                  disabled={isAnalyzing || !contentInput.trim()}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Hash className="w-4 h-4" />}
-                  Generate Hashtags (2 VQT)
-                </Button>
-                <Button
-                  onClick={runOptimization}
-                  disabled={isAnalyzing || !contentInput.trim()}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
-                  Optimize Content (3 VQT)
-                </Button>
-              </div>
-
-              {/* Results Display */}
-              {viralResult && (
-                <Card className="bg-gradient-to-r from-[#EC4899]/5 to-transparent border-[#EC4899]/20">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <TrendingUp className="w-5 h-5 text-[#EC4899]" />
-                      <h4 className="font-semibold text-[#0B0F19]">Viral Prediction Results</h4>
-                      <Badge variant="secondary" className="ml-auto">
-                        via {aiSource}
-                      </Badge>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
-                      <div className="text-center p-3 rounded-lg bg-white">
-                        <p className="text-2xl font-bold text-[#EC4899]">{viralResult.viralProbability}%</p>
-                        <p className="text-xs text-[#6B7280]">Viral Probability</p>
-                      </div>
-                      <div className="text-center p-3 rounded-lg bg-white">
-                        <p className={cn(
-                          "text-2xl font-bold",
-                          viralResult.prediction === 'high' ? 'text-[#00D4AA]' :
-                          viralResult.prediction === 'medium' ? 'text-[#F59E0B]' : 'text-[#6B7280]'
-                        )}>
-                          {viralResult.prediction?.toUpperCase()}
-                        </p>
-                        <p className="text-xs text-[#6B7280]">Prediction</p>
-                      </div>
-                      <div className="text-center p-3 rounded-lg bg-white">
-                        <p className="text-2xl font-bold text-[#0B0F19]">{viralResult.estimatedReach?.toLocaleString()}</p>
-                        <p className="text-xs text-[#6B7280]">Est. Reach</p>
-                      </div>
-                      <div className="text-center p-3 rounded-lg bg-white">
-                        <p className="text-2xl font-bold text-[#0B0F19]">{Math.round(viralResult.factors?.hookStrength * 100)}%</p>
-                        <p className="text-xs text-[#6B7280]">Hook Strength</p>
-                      </div>
-                    </div>
-                    {viralResult.recommendations && (
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-[#0B0F19]">Recommendations:</p>
-                        <ul className="space-y-1">
-                          {viralResult.recommendations.map((rec: string, i: number) => (
-                            <li key={i} className="text-sm text-[#6B7280] flex items-start gap-2">
-                              <span className="text-[#EC4899]">•</span>
-                              {rec}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-
-              {hashtagResult && (
-                <Card className="bg-gradient-to-r from-[#00D4AA]/5 to-transparent border-[#00D4AA]/20">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Hash className="w-5 h-5 text-[#00D4AA]" />
-                      <h4 className="font-semibold text-[#0B0F19]">Recommended Hashtags</h4>
-                      <Badge variant="secondary" className="ml-auto">
-                        via {aiSource}
-                      </Badge>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {hashtagResult.hashtags?.map((tag: string, i: number) => (
-                        <Badge
-                          key={i}
-                          className="bg-[#00D4AA]/10 text-[#00D4AA] hover:bg-[#00D4AA]/20 cursor-pointer"
-                          onClick={() => {
-                            navigator.clipboard.writeText('#' + tag);
-                            toast.success(`Copied #${tag}`);
-                          }}
-                        >
-                          #{tag}
-                        </Badge>
-                      ))}
-                    </div>
-                    <p className="text-xs text-[#6B7280] mt-2">
-                      Relevance: {Math.round((hashtagResult.relevance || 0) * 100)}% • Click to copy
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {optimizationResult && (
-                <Card className="bg-gradient-to-r from-[#F59E0B]/5 to-transparent border-[#F59E0B]/20">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Wand2 className="w-5 h-5 text-[#F59E0B]" />
-                      <h4 className="font-semibold text-[#0B0F19]">Optimization Suggestions</h4>
-                      <Badge variant="secondary" className="ml-auto">
-                        via {aiSource}
-                      </Badge>
-                    </div>
-                    {optimizationResult.optimizations?.length > 0 && (
-                      <div className="space-y-2 mb-4">
-                        <p className="text-sm font-medium text-[#0B0F19]">Improvements:</p>
-                        <ul className="space-y-1">
-                          {optimizationResult.optimizations.map((opt: string, i: number) => (
-                            <li key={i} className="text-sm text-[#6B7280] flex items-start gap-2">
-                              <CheckCircle className="w-4 h-4 text-[#00D4AA] flex-shrink-0 mt-0.5" />
-                              {opt}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {optimizationResult.issues?.length > 0 && (
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-[#0B0F19]">Issues to Fix:</p>
-                        <ul className="space-y-1">
-                          {optimizationResult.issues.map((issue: string, i: number) => (
-                            <li key={i} className="text-sm text-[#EF4444] flex items-start gap-2">
-                              <span>⚠️</span>
-                              {issue}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    <div className="mt-4 p-3 rounded-lg bg-white">
-                      <p className="text-sm text-[#6B7280]">
-                        Estimated Engagement: <span className="font-semibold text-[#0B0F19]">{optimizationResult.estimatedEngagement}%</span>
-                      </p>
-                      <p className="text-sm text-[#6B7280]">
-                        Best Posting Time: <span className="font-semibold text-[#0B0F19]">{optimizationResult.bestPostingTime}</span>
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+              <Button
+                onClick={runTitleOptimizer}
+                disabled={isLoading('f92') || !titleInput.trim()}
+                className="bg-[#EC4899] hover:bg-[#EC4899]/90 gap-2"
+              >
+                {isLoading('f92') ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
+                Optimize Title
+              </Button>
+              {featureResults.f92 && (
+                <FeatureResultPanel
+                  result={featureResults.f92}
+                  featureId="f92"
+                  featureName="Title Optimizer"
+                  source={featureResults.f92.source}
+                />
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="thumbnails" className="space-y-4">
-          {mockStudioData.thumbnailTests.map((test) => (
-            <Card key={test.id} className="border-[#E5E7EB]">
-              <CardHeader>
-                <CardTitle className="text-lg font-semibold text-[#0B0F19] flex items-center gap-2">
-                  <ImageIcon className="w-5 h-5 text-[#EC4899]" />
-                  Thumbnail A/B Test
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid sm:grid-cols-2 gap-4 mb-4">
-                  {test.variants.map((variant) => (
-                    <div
-                      key={variant.id}
-                      className={`
-                        p-4 rounded-xl border-2 transition-colors
-                        ${test.predictedWinner === variant.id 
-                          ? 'border-[#00D4AA] bg-[#00D4AA]/5' 
-                          : 'border-[#E5E7EB]'}
-                      `}
-                    >
-                      <div className="aspect-video bg-[#F6F7F9] rounded-lg mb-3 flex items-center justify-center">
-                        <ImageIcon className="w-8 h-8 text-[#6B7280]" />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-[#0B0F19]">Variant {variant.id.toUpperCase()}</span>
-                        <Badge className="bg-[#EC4899]/10 text-[#EC4899] border-none">
-                          {variant.predictedCTR}% CTR
-                        </Badge>
-                      </div>
-                      {test.predictedWinner === variant.id && (
-                        <div className="flex items-center gap-2 mt-2 text-[#00D4AA]">
-                          <CheckCircle className="w-4 h-4" />
-                          <span className="text-sm">Predicted Winner ({test.confidence}% confidence)</span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
-
-        <TabsContent value="titles" className="space-y-4">
-          <Card className="border-[#E5E7EB]">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-[#0B0F19] flex items-center gap-2">
-                <Type className="w-5 h-5 text-[#EC4899]" />
-                Title Optimizer
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-6">
-                <p className="text-sm text-[#6B7280] mb-2">Original Title</p>
-                <div className="p-4 rounded-xl bg-[#F6F7F9] text-[#0B0F19]">
-                  {mockStudioData.titleOptimizations.original}
-                </div>
-              </div>
-              
-              <p className="text-sm text-[#6B7280] mb-3">AI Suggestions</p>
-              <div className="space-y-3">
-                {mockStudioData.titleOptimizations.suggestions.map((suggestion, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 rounded-xl bg-[#F6F7F9]"
-                  >
-                    <p className="text-[#0B0F19]">{suggestion}</p>
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2">
-                        <Wand2 className="w-4 h-4 text-[#EC4899]" />
-                        <span className="text-sm font-medium text-[#00D4AA]">
-                          {mockStudioData.titleOptimizations.viralScores[index]}% viral
-                        </span>
-                      </div>
-                      <Button size="sm" variant="outline">Use</Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
+        {/* Features Tab */}
         <TabsContent value="features" className="space-y-4">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {features.filter(f => !f.isFree).map((feature) => (
-              <div
-                key={feature.id}
-                className="p-4 rounded-xl border border-[#E5E7EB] hover:border-[#EC4899]/50 transition-colors"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <h4 className="font-medium text-[#0B0F19]">{feature.name}</h4>
-                  <Badge className="bg-[#EC4899]/10 text-[#EC4899] border-none">
-                    {feature.vqtCost} VQT
-                  </Badge>
-                </div>
-                <p className="text-sm text-[#6B7280] mb-4">{feature.description}</p>
-                <Button
-                  size="sm"
-                  className="w-full bg-[#EC4899] hover:bg-[#EC4899]/90 text-white gap-2"
-                  onClick={() => handleRunFeature(feature.id, feature.vqtCost, feature.name)}
+            {features
+              .filter((f) => !f.isFree)
+              .map((feature) => (
+                <div
+                  key={feature.id}
+                  className="p-4 rounded-xl border border-[#E5E7EB] hover:border-[#EC4899]/50 transition-colors"
                 >
-                  <Play className="w-4 h-4" />
-                  Run
-                </Button>
-              </div>
-            ))}
+                  <div className="flex items-start justify-between mb-3">
+                    <h4 className="font-medium text-[#0B0F19]">{feature.name}</h4>
+                    <Badge className="bg-[#EC4899]/10 text-[#EC4899] border-none">
+                      {feature.vqtCost} VQT
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-[#6B7280] mb-4">{feature.description}</p>
+                  <Button
+                    size="sm"
+                    className="w-full bg-[#EC4899] hover:bg-[#EC4899]/90 text-white gap-2"
+                    onClick={() => handleRunFeature(feature.id, feature.vqtCost, feature.name)}
+                    disabled={isLoading(feature.id)}
+                  >
+                    {isLoading(feature.id) ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Play className="w-4 h-4" />
+                    )}
+                    {isLoading(feature.id) ? 'Running...' : 'Run'}
+                  </Button>
+                  {featureResults[feature.id] && (
+                    <div className="mt-3">
+                      <FeatureResultPanel
+                        result={featureResults[feature.id]}
+                        featureId={feature.id}
+                        featureName={feature.name}
+                        source={featureResults[feature.id].source}
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
           </div>
         </TabsContent>
       </Tabs>
