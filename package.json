@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:deploy": "tsc -b && vite build && cp dist/index.dev.html index.html && cp dist/_redirects _redirects && rm -rf assets && cp -r dist/assets assets && rm -rf dist",
+    "dev": "vite",
     "lint": "eslint .",
     "preview": "vite preview"
   },
