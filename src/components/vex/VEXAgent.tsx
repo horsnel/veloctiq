@@ -753,14 +753,14 @@ export function VEXAgent({ autoExpand = false }: VEXAgentProps) {
               setIsVoiceMode(false);
               stopVoiceInput();
             }}
-            className="absolute top-6 right-6 text-[#6B7280] hover:text-white transition-colors flex items-center gap-2 text-sm"
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 text-[#6B7280] hover:text-white transition-colors flex items-center gap-2 text-sm"
           >
             <Minimize2 className="w-4 h-4" />
             Switch to text mode
           </button>
 
           {/* VEX branding */}
-          <div className="flex items-center gap-3 mb-12">
+          <div className="flex items-center gap-3 mb-8 sm:mb-12">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F97316] to-[#F59E0B] flex items-center justify-center">
               <Bot className="w-5 h-5 text-white" />
             </div>
@@ -768,7 +768,7 @@ export function VEXAgent({ autoExpand = false }: VEXAgentProps) {
           </div>
 
           {/* Large pulsing mic button */}
-          <div className="relative mb-12">
+          <div className="relative mb-8 sm:mb-12">
             {/* Animated rings */}
             {isListening && (
               <>
@@ -780,16 +780,16 @@ export function VEXAgent({ autoExpand = false }: VEXAgentProps) {
             <button
               onClick={isListening ? stopVoiceInput : startVoiceInput}
               className={cn(
-                'relative w-28 h-28 rounded-full flex items-center justify-center transition-all duration-300',
+                'relative w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center transition-all duration-300',
                 isListening
                   ? 'bg-[#EF4444] hover:bg-[#EF4444]/90 shadow-[0_0_60px_rgba(239,68,68,0.4)]'
                   : 'bg-gradient-to-br from-[#F97316] to-[#F59E0B] hover:shadow-[0_0_40px_rgba(249,115,22,0.4)] shadow-lg'
               )}
             >
               {isListening ? (
-                <MicOff className="w-10 h-10 text-white" />
+                <MicOff className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
               ) : (
-                <Mic className="w-10 h-10 text-white" />
+                <Mic className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
               )}
             </button>
           </div>
@@ -800,7 +800,7 @@ export function VEXAgent({ autoExpand = false }: VEXAgentProps) {
           </p>
 
           {/* Live transcription panel */}
-          <div className="w-full max-w-xl bg-[#1A1A2E] rounded-2xl p-6 mb-8 min-h-[120px]">
+          <div className="w-full max-w-xl bg-[#1A1A2E] rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 min-h-[100px] sm:min-h-[120px]">
             <div className="flex items-center gap-2 mb-4">
               <div className={cn('w-2 h-2 rounded-full', isListening ? 'bg-[#F97316] animate-pulse' : 'bg-[#6B7280]')} />
               <span className="text-xs text-[#6B7280] uppercase tracking-wider">Live Transcription</span>
@@ -874,12 +874,12 @@ export function VEXAgent({ autoExpand = false }: VEXAgentProps) {
               <p className="text-xs text-[#6B7280]">Powered by {aiSource === 'groq' ? 'Groq AI' : aiSource === 'browser' ? 'Browser AI' : 'WebLLM'}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="gap-1">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+            <Badge variant="secondary" className="gap-1 hidden sm:flex">
               <Coins className="w-3 h-3" />
               {formatVQT(balance)}
             </Badge>
-            <div className="flex items-center gap-1 px-2 py-1 bg-[#F6F7F9] rounded-lg" title={isOnline ? 'Online' : 'Offline'}>
+            <div className="hidden sm:flex items-center gap-1 px-2 py-1 bg-[#F6F7F9] rounded-lg" title={isOnline ? 'Online' : 'Offline'}>
               {isOnline ? <Wifi className="w-3 h-3 text-[#00D4AA]" /> : <WifiOff className="w-3 h-3 text-[#EF4444]" />}
               <span className="text-xs text-[#6B7280]">{isOnline ? 'Online' : 'Offline'}</span>
             </div>

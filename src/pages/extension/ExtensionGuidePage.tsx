@@ -85,7 +85,7 @@ export function ExtensionGuidePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F19]">
+    <div className="min-h-dvh bg-[#0B0F19]">
       {/* Header */}
       <header className="border-b border-white/10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">

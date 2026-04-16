@@ -57,11 +57,11 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
   const isOnVexPage = location.pathname === '/vex';
 
   return (
-    <div className="min-h-screen bg-[#F6F7F9]">
+    <div className="min-h-dvh bg-[#F6F7F9]">
       <Sidebar />
       <main
         className={cn(
-          'transition-all duration-300 min-h-screen',
+          'transition-all duration-300 min-h-dvh',
           'lg:ml-16',
           sidebarOpen && 'lg:ml-64'
         )}

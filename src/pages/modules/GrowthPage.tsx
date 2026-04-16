@@ -60,7 +60,7 @@ export function GrowthPage() {
       {/* Burnout Warning */}
       <Card className="border-[#E5E7EB]" style={{ borderColor: burnoutColor, backgroundColor: `${burnoutColor}08` }}>
         <CardContent className="p-6">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="w-14 h-14 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${burnoutColor}15` }}>
               <AlertOctagon className="w-7 h-7" style={{ color: burnoutColor }} />
             </div>

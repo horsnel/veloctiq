@@ -66,7 +66,7 @@ export function DashboardPage() {
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         {[
           { label: 'Total Followers', value: '73.2K', change: '+12%', trend: 'up' },
           { label: 'Engagement Rate', value: '4.2%', change: '+0.3%', trend: 'up' },
@@ -107,7 +107,7 @@ export function DashboardPage() {
       </div>
 
       {/* Main Grid */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Channel Health */}
         <Card className="dashboard-card border-[#E5E7EB] lg:col-span-2">
           <CardHeader className="pb-2">
@@ -122,8 +122,8 @@ export function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-8 mb-6">
-              <div className="relative w-28 h-28">
+            <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8 mb-6">
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0">
                 <svg className="w-full h-full -rotate-90">
                   <circle
                     cx="56"
@@ -149,7 +149,7 @@ export function DashboardPage() {
                   <span className="text-2xl font-bold text-[#0B0F19]">{mockChannelHealth.score}</span>
                 </div>
               </div>
-              <div className="flex-1 space-y-3">
+              <div className="flex-1 space-y-3 w-full">
                 {mockChannelHealth.metrics.slice(0, 3).map((metric) => (
                   <div key={metric.name}>
                     <div className="flex justify-between text-sm mb-1">
@@ -207,7 +207,7 @@ export function DashboardPage() {
       </div>
 
       {/* Second Row */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Live Signals */}
         <Card className="dashboard-card border-[#E5E7EB] lg:col-span-2">
           <CardHeader className="pb-2">
@@ -223,7 +223,7 @@ export function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <ScrollArea className="h-64">
+            <ScrollArea className="h-48 sm:h-64">
               <div className="space-y-3">
                 {mockLiveSignals.map((signal) => (
                   <div

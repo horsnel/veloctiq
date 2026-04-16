@@ -156,12 +156,12 @@ export function ContentCalendar() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 sm:gap-4">
           <Button variant="outline" size="icon" onClick={() => navigateMonth('prev')}>
             ←
           </Button>
-          <h2 className="text-xl font-semibold text-[#0B0F19]">
+          <h2 className="text-lg sm:text-xl font-semibold text-[#0B0F19]">
             {monthName} {year}
           </h2>
           <Button variant="outline" size="icon" onClick={() => navigateMonth('next')}>
@@ -267,17 +267,16 @@ export function ContentCalendar() {
           <div className="grid grid-cols-7 gap-1">
             {calendarDays.map((day, index) => {
               if (day === null) {
-                return <div key={`empty-${index}`} className="aspect-square" />;
+                return <div key={`empty-${index}`} className="min-h-[3rem] sm:aspect-square" />;
               }
               
               const dayPosts = getPostsForDay(day);
               const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
               
               return (
-                <div 
-                  key={day}
+                <div key={day}
                   className={cn(
-                    'aspect-square border rounded-lg p-1 overflow-hidden cursor-pointer hover:bg-[#F6F7F9] transition-colors',
+                    'min-h-[3rem] sm:aspect-square border rounded-lg p-0.5 sm:p-1 overflow-hidden cursor-pointer hover:bg-[#F6F7F9] transition-colors',
                     isToday && 'border-[#00D4AA] bg-[#00D4AA]/5'
                   )}
                 >

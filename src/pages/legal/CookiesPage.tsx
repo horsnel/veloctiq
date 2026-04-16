@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 
 export function CookiesPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-dvh bg-white">
       <div className="max-w-3xl mx-auto px-4 py-12">
         <Link to="/" className="inline-flex items-center gap-2 text-[#6B7280] hover:text-[#0B0F19] mb-8">
           <ArrowLeft className="w-4 h-4" />
