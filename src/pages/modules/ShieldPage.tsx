@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useFeatureStore, useTokenStore, useAuthStore } from '@/stores';
+import { useFeatureStore, useAuthStore } from '@/stores';
 import { aiService } from '@/services/AIService';
 import { mockShieldData } from '@/lib/mockData';
 import { formatRelativeTime, cn } from '@/lib/utils';
-import { toast } from 'sonner';
+import { useFeatureRunner } from '@/hooks/useFeatureRunner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -26,15 +26,18 @@ import {
   Cpu,
   Loader2,
   ShieldCheck,
-  XCircle
+  XCircle,
+  Lightbulb,
+  Sparkles
 } from 'lucide-react';
 
 export function ShieldPage() {
   const { getFeaturesByCategory } = useFeatureStore();
-  const { spendTokens, getFreeAnalysesRemaining } = useTokenStore();
   useAuthStore();
   const features = getFeaturesByCategory('shield');
   const [activeTab, setActiveTab] = useState('overview');
+  const { isRunning, results, runFeature } = useFeatureRunner();
+  const [expandedFeature, setExpandedFeature] = useState<string | null>(null);
   const [toxicityThreshold, setToxicityThreshold] = useState(mockShieldData.toxicitySettings.threshold * 100);
   const [autoFilter, setAutoFilter] = useState(mockShieldData.toxicitySettings.autoFilter);
   
@@ -46,70 +49,33 @@ export function ShieldPage() {
   const [toxicityResult, setToxicityResult] = useState<any>(null);
   const [aiSource, setAiSource] = useState<'groq' | 'browser' | 'webllm'>('browser');
 
-  const handleRunFeature = (featureId: string, cost: number, name: string) => {
-    const success = spendTokens(cost, featureId, `Used ${name}`);
-    if (success) {
-      toast.success(`${name} completed successfully!`);
-    } else {
-      toast.error('Insufficient VQT balance. Please purchase more tokens.');
-    }
+  const handleRunFeature = async (featureId: string, cost: number, name: string) => {
+    setExpandedFeature(featureId);
+    await runFeature(featureId, name, cost);
   };
 
   // AI-powered bot detection
   const runBotDetection = async () => {
-    if (!usernameInput.trim()) {
-      toast.error('Please enter usernames to check (comma-separated)');
-      return;
-    }
-
-    const freeRemaining = getFreeAnalysesRemaining();
-    if (freeRemaining === 0) {
-      const success = spendTokens(3, 'f1', 'Bot Detection');
-      if (!success) {
-        toast.error('Insufficient VQT balance');
-        return;
-      }
-    }
-
+    if (!usernameInput.trim()) return;
     setIsAnalyzing(true);
     try {
       const usernames = usernameInput.split(',').map(u => u.trim().replace('@', ''));
       const result = await aiService.detectBots(usernames);
       setBotResult(result.data);
       setAiSource(result.source as 'groq' | 'browser' | 'webllm');
-      const botsFound = result.data?.filter((b: any) => b.isBot).length || 0;
-      toast.success(`Analysis complete! ${botsFound} potential bot(s) found. ${freeRemaining > 0 ? `(${freeRemaining - 1} free analyses left)` : ''}`);
-    } catch (error) {
-      toast.error('Bot detection failed');
-    }
+    } catch { /* handled by ui */ }
     setIsAnalyzing(false);
   };
 
   // AI-powered toxicity detection
   const runToxicityCheck = async () => {
-    if (!commentInput.trim()) {
-      toast.error('Please enter a comment to analyze');
-      return;
-    }
-
-    const freeRemaining = getFreeAnalysesRemaining();
-    if (freeRemaining === 0) {
-      const success = spendTokens(2, 'f2', 'Toxicity Detection');
-      if (!success) {
-        toast.error('Insufficient VQT balance');
-        return;
-      }
-    }
-
+    if (!commentInput.trim()) return;
     setIsAnalyzing(true);
     try {
       const result = await aiService.detectToxicity(commentInput);
       setToxicityResult(result.data);
       setAiSource(result.source as 'groq' | 'browser' | 'webllm');
-      toast.success(`Toxicity analysis complete! ${freeRemaining > 0 ? `(${freeRemaining - 1} free analyses left)` : ''}`);
-    } catch (error) {
-      toast.error('Toxicity check failed');
-    }
+    } catch { /* handled by ui */ }
     setIsAnalyzing(false);
   };
 
@@ -469,10 +435,16 @@ export function ShieldPage() {
             </CardHeader>
             <CardContent>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {paidFeatures.map((feature) => (
+                {paidFeatures.map((feature) => {
+                  const result = results[feature.id];
+                  const isExpanded = expandedFeature === feature.id;
+                  return (
                   <div
                     key={feature.id}
-                    className="p-4 rounded-xl border border-[#E5E7EB] hover:border-[#00D4AA]/50 transition-colors"
+                    className={cn(
+                      "p-4 rounded-xl border transition-colors",
+                      isExpanded ? 'border-[#00D4AA]/50 bg-[#00D4AA]/5' : 'border-[#E5E7EB] hover:border-[#00D4AA]/50'
+                    )}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <h4 className="font-medium text-[#0B0F19]">{feature.name}</h4>
@@ -485,12 +457,42 @@ export function ShieldPage() {
                       size="sm"
                       className="w-full bg-[#00D4AA] hover:bg-[#00D4AA]/90 text-white gap-2"
                       onClick={() => handleRunFeature(feature.id, feature.vqtCost, feature.name)}
+                      disabled={isRunning}
                     >
-                      <Play className="w-4 h-4" />
-                      Run
+                      {isRunning && expandedFeature === feature.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+                      {isRunning && expandedFeature === feature.id ? 'Running...' : 'Run'}
                     </Button>
+                    {result && isExpanded && (
+                      <div className="mt-4 space-y-3">
+                        <div className="flex items-center gap-2 text-sm font-medium text-[#0B0F19]">
+                          <CheckCircle className="w-4 h-4 text-[#00D4AA]" />
+                          {result.summary}
+                        </div>
+                        {result.insights.length > 0 && (
+                          <div className="space-y-1">
+                            {result.insights.map((insight, i) => (
+                              <p key={i} className="text-xs text-[#6B7280] flex items-start gap-1.5">
+                                <Lightbulb className="w-3 h-3 text-[#F59E0B] mt-0.5 flex-shrink-0" />
+                                {insight}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                        {result.recommendations.length > 0 && (
+                          <div className="space-y-1">
+                            {result.recommendations.map((rec, i) => (
+                              <p key={i} className="text-xs text-[#6B7280] flex items-start gap-1.5">
+                                <Sparkles className="w-3 h-3 text-[#00D4AA] mt-0.5 flex-shrink-0" />
+                                {rec}
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>

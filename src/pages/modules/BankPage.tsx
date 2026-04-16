@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useFeatureStore, useTokenStore } from '@/stores';
+import { useFeatureStore } from '@/stores';
 import { mockBankData } from '@/lib/mockData';
-import { formatNaira } from '@/lib/utils';
-import { toast } from 'sonner';
+import { formatNaira, cn } from '@/lib/utils';
+import { useFeatureRunner } from '@/hooks/useFeatureRunner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,22 +12,23 @@ import {
   TrendingUp, 
   TrendingDown,
   Target,
-  Play
+  Play,
+  Loader2,
+  Lightbulb,
+  Sparkles,
+  CheckCircle
 } from 'lucide-react';
 
 export function BankPage() {
   const { getFeaturesByCategory } = useFeatureStore();
-  const { spendTokens } = useTokenStore();
+  const { isRunning, results, runFeature } = useFeatureRunner();
   const features = getFeaturesByCategory('bank');
   const [activeTab, setActiveTab] = useState('intent');
+  const [expandedFeature, setExpandedFeature] = useState<string | null>(null);
 
-  const handleRunFeature = (featureId: string, cost: number, name: string) => {
-    const success = spendTokens(cost, featureId, `Used ${name}`);
-    if (success) {
-      toast.success(`${name} completed successfully!`);
-    } else {
-      toast.error('Insufficient VQT balance. Please purchase more tokens.');
-    }
+  const handleRunFeature = async (featureId: string, cost: number, name: string) => {
+    setExpandedFeature(featureId);
+    await runFeature(featureId, name, cost);
   };
 
   return (
@@ -163,10 +164,13 @@ export function BankPage() {
 
         <TabsContent value="features" className="space-y-4">
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {features.filter(f => !f.isFree).map((feature) => (
+            {features.filter(f => !f.isFree).map((feature) => {
+              const result = results[feature.id];
+              const isExpanded = expandedFeature === feature.id;
+              return (
               <div
                 key={feature.id}
-                className="p-4 rounded-xl border border-[#E5E7EB] hover:border-[#F59E0B]/50 transition-colors"
+                className={cn("p-4 rounded-xl border transition-colors", isExpanded ? 'border-[#F59E0B]/50 bg-[#F59E0B]/5' : 'border-[#E5E7EB] hover:border-[#F59E0B]/50')}
               >
                 <div className="flex items-start justify-between mb-3">
                   <h4 className="font-medium text-[#0B0F19]">{feature.name}</h4>
@@ -179,12 +183,21 @@ export function BankPage() {
                   size="sm"
                   className="w-full bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-white gap-2"
                   onClick={() => handleRunFeature(feature.id, feature.vqtCost, feature.name)}
+                  disabled={isRunning}
                 >
-                  <Play className="w-4 h-4" />
-                  Run
+                  {isRunning && expandedFeature === feature.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+                  {isRunning && expandedFeature === feature.id ? 'Running...' : 'Run'}
                 </Button>
+                {result && isExpanded && (
+                  <div className="mt-4 space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-medium text-[#0B0F19]"><CheckCircle className="w-4 h-4 text-[#00D4AA]" />{result.summary}</div>
+                    {result.insights.length > 0 && <div className="space-y-1">{result.insights.map((insight, i) => <p key={i} className="text-xs text-[#6B7280] flex items-start gap-1.5"><Lightbulb className="w-3 h-3 text-[#F59E0B] mt-0.5 flex-shrink-0" />{insight}</p>)}</div>}
+                    {result.recommendations.length > 0 && <div className="space-y-1">{result.recommendations.map((rec, i) => <p key={i} className="text-xs text-[#6B7280] flex items-start gap-1.5"><Sparkles className="w-3 h-3 text-[#00D4AA] mt-0.5 flex-shrink-0" />{rec}</p>)}</div>}
+                  </div>
+                )}
               </div>
-            ))}
+              );
+            })}
           </div>
         </TabsContent>
       </Tabs>
