@@ -215,7 +215,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f18: async () => {
-    const fans = Array.from({ length: 10 }, (_, _i) => ({
+    const fans = Array.from({ length: 10 }, (_, i) => ({
       username: `superfan_${String(i + 1).padStart(3, '0')}`,
       platform: pick(['YouTube', 'Instagram', 'TikTok', 'Twitter']),
       engagementScore: ri(75, 99),
@@ -298,7 +298,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f26: async () => {
-    const ages = Array.from({ length: 8 }, (_, _i) => ({ commenter: `user_${i + 1}`, soulAge: ri(15, 65), sophistication: pick(['basic', 'intermediate', 'advanced']) }));
+    const ages = Array.from({ length: 8 }, (_, i) => ({ commenter: `user_${i + 1}`, soulAge: ri(15, 65), sophistication: pick(['basic', 'intermediate', 'advanced']) }));
     return ok('f26', 'Commenter Soul Age Estimator', { commenters: ages, averageSoulAge: r(22, 38), distribution: { young: ri(30, 50), mature: ri(30, 45), elder: ri(10, 20) } },
       `Average commenter soul age: ${Math.round(r(22, 38))}. Audience skews ${pick(['young', 'mature'])}.`,
       ['Comment sophistication suggests an educated audience', 'Younger commenters tend to use more informal language'],
@@ -314,7 +314,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f28: async () => {
-    const ideas = Array.from({ length: 5 }, (_, _i) => ({ title: `Dream Content ${i + 1}`, matchScore: ri(70, 98), audienceDemand: ri(60, 95) }));
+    const ideas = Array.from({ length: 5 }, (_, i) => ({ title: `Dream Content ${i + 1}`, matchScore: ri(70, 98), audienceDemand: ri(60, 95) }));
     return ok('f28', 'Audience Dream Content Generator', { ideas, totalDemandScore: r(70, 95) },
       `Generated ${ideas.length} content ideas based on audience desire signals.`,
       ideas.slice(0, 3).map(i => `"${i.title}" matches ${i.matchScore}% of audience interests`),
@@ -337,7 +337,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f31: async () => {
-    const finds = Array.from({ length: 3 }, (_, _i) => ({ content: `Deleted comment recovered ${i + 1}`, date: new Date(Date.now() - ri(1, 90) * 86400000).toISOString(), significance: pick(['High', 'Medium', 'Low']) }));
+    const finds = Array.from({ length: 3 }, (_, i) => ({ content: `Deleted comment recovered ${i + 1}`, date: new Date(Date.now() - ri(1, 90) * 86400000).toISOString(), significance: pick(['High', 'Medium', 'Low']) }));
     return ok('f31', 'Content Seance', { finds, totalAnalyzed: ri(100, 500), recoveryRate: r(10, 40) },
       `Recovered ${finds.length} significant content items from ${ri(100, 500)} analyzed records.`,
       finds.map(f => `"${f.content}" (${f.significance} significance)`),
@@ -345,7 +345,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f32: async () => {
-    const comments = Array.from({ length: 5 }, (_, _i) => ({ text: `Hidden comment ${i + 1}`, sentiment: pick(['positive', 'negative', 'neutral']), likes: ri(0, 100) }));
+    const comments = Array.from({ length: 5 }, (_, i) => ({ text: `Hidden comment ${i + 1}`, sentiment: pick(['positive', 'negative', 'neutral']), likes: ri(0, 100) }));
     return ok('f32', 'Comment Section Seance', { comments, totalHidden: ri(20, 100), patterns: ['Trending negative sentiment in hidden comments', 'Hidden comments contain valuable feedback'] },
       `Analyzed ${ri(20, 100)} hidden/deleted comments. Found ${comments.length} significant items.`,
       ['Hidden comments often contain the most honest feedback', 'Negative sentiment in hidden comments is higher than visible ones'],
@@ -357,7 +357,7 @@ const registry: Record<string, FeatureFn> = {
   // ═══════════════════════════════════════════════════════════════════════════
 
   f33: async () => {
-    const keywords = Array.from({ length: 8 }, (_, _i) => ({ keyword: `keyword_${i + 1}`, score: ri(50, 98), volume: ri(500, 15000), trend: pick(['up', 'down', 'stable'] as const) }));
+    const keywords = Array.from({ length: 8 }, (_, i) => ({ keyword: `keyword_${i + 1}`, score: ri(50, 98), volume: ri(500, 15000), trend: pick(['up', 'down', 'stable'] as const) }));
     return ok('f33', 'Buying Intent Scoring', { keywords: keywords.sort((a, b) => b.score - a.score) },
       `Top buying intent: "${keywords[0].keyword}" at ${keywords[0].score}% intent score.`,
       keywords.slice(0, 3).map(k => `"${k.keyword}": ${k.score}% intent (${k.trend})`),
@@ -365,7 +365,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f34: async () => {
-    const matches = Array.from({ length: 5 }, (_, _i) => ({ brand: `Brand_${i + 1}`, fitScore: ri(60, 98), commission: `${ri(5, 30)}%`, category: pick(['Tech', 'Software', 'Equipment', 'Finance', 'Lifestyle']) }));
+    const matches = Array.from({ length: 5 }, (_, i) => ({ brand: `Brand_${i + 1}`, fitScore: ri(60, 98), commission: `${ri(5, 30)}%`, category: pick(['Tech', 'Software', 'Equipment', 'Finance', 'Lifestyle']) }));
     return ok('f34', 'Affiliate Matchmaker', { matches: matches.sort((a, b) => b.fitScore - a.fitScore), totalScanned: ri(50, 200) },
       `Best match: ${matches[0].brand} at ${matches[0].fitScore}% fit with ${matches[0].commission} commission.`,
       matches.slice(0, 3).map(m => `${m.brand}: ${m.fitScore}% fit (${m.category})`),
@@ -373,7 +373,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f35: async () => {
-    const trends = Array.from({ length: 5 }, (_, _i) => ({ topic: `Trend_${i + 1}`, searchVolume: ri(1000, 50000), competition: pick(['low', 'medium', 'high']), growth: r(5, 40) }));
+    const trends = Array.from({ length: 5 }, (_, i) => ({ topic: `Trend_${i + 1}`, searchVolume: ri(1000, 50000), competition: pick(['low', 'medium', 'high']), growth: r(5, 40) }));
     return ok('f35', 'Trend Blue Ocean Radar', { trends: trends.sort((a, b) => b.growth - a.growth), blueOceans: trends.filter(t => t.competition === 'low') },
       `Found ${trends.filter(t => t.competition === 'low').length} blue ocean trend(s) with high growth potential.`,
       trends.slice(0, 3).map(t => `"${t.topic}": ${t.growth}% growth (${t.competition} competition)`),
@@ -389,7 +389,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f37: async () => {
-    const products = Array.from({ length: 4 }, (_, _i) => ({ name: `Product_${i + 1}`, demand: ri(40, 95), trend: pick(['rising', 'stable', 'declining']), niche: pick(['Tech', 'Lifestyle', 'Education', 'Finance']) }));
+    const products = Array.from({ length: 4 }, (_, i) => ({ name: `Product_${i + 1}`, demand: ri(40, 95), trend: pick(['rising', 'stable', 'declining']), niche: pick(['Tech', 'Lifestyle', 'Education', 'Finance']) }));
     return ok('f37', 'Product Trend Lab', { products, trendingCategory: pick(['Tech', 'Lifestyle', 'Education']), topNiche: pick(['AI Tools', 'Creator Economy', 'Remote Work', 'Sustainability']) },
       `Top trending product: ${products[0].name} (${products[0].demand}% demand).`,
       products.slice(0, 3).map(p => `${p.name}: ${p.demand}% demand (${p.trend})`),
@@ -405,7 +405,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f39: async () => {
-    const niches = Array.from({ length: 5 }, (_, _i) => ({ niche: `Niche_${i + 1}`, profitability: ri(30, 95), avgCPM: ri(2, 20), competition: pick(['low', 'medium', 'high']) }));
+    const niches = Array.from({ length: 5 }, (_, i) => ({ niche: `Niche_${i + 1}`, profitability: ri(30, 95), avgCPM: ri(2, 20), competition: pick(['low', 'medium', 'high']) }));
     return ok('f39', 'Niche Profitability Benchmarking', { niches: niches.sort((a, b) => b.profitability - a.profitability) },
       `Most profitable niche: ${niches[0].niche} (${niches[0].profitability}% profitability).`,
       niches.slice(0, 3).map(n => `${n.niche}: ${n.profitability}% profitable, avg CPM $${n.avgCPM}`),
@@ -422,7 +422,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f41: async () => {
-    const campaigns = Array.from({ length: 3 }, (_, _i) => ({ name: `Campaign_${i + 1}`, stage: pick(['planning', 'active', 'closing']), revenue: ri(100, 5000), roi: r(1, 5) }));
+    const campaigns = Array.from({ length: 3 }, (_, i) => ({ name: `Campaign_${i + 1}`, stage: pick(['planning', 'active', 'closing']), revenue: ri(100, 5000), roi: r(1, 5) }));
     return ok('f41', 'Campaign Lifecycle Manager', { campaigns, activeCampaigns: campaigns.filter(c => c.stage === 'active').length },
       `${campaigns.filter(c => c.stage === 'active').length} active campaign(s). ${campaigns.length} total in pipeline.`,
       campaigns.map(c => `${c.name}: ${c.stage} ($${c.revenue} revenue, ${c.roi.toFixed(1)}x ROI)`),
@@ -437,7 +437,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f43: async () => {
-    const inventory = Array.from({ length: 4 }, (_, _i) => ({ brand: `Hidden Brand_${i + 1}`, estimatedValue: ri(50000, 500000), category: pick(['Tech', 'Finance', 'Lifestyle']), fit: ri(60, 95) }));
+    const inventory = Array.from({ length: 4 }, (_, i) => ({ brand: `Hidden Brand_${i + 1}`, estimatedValue: ri(50000, 500000), category: pick(['Tech', 'Finance', 'Lifestyle']), fit: ri(60, 95) }));
     return ok('f43', 'Sponsor Shadow Inventory', { inventory: inventory.sort((a, b) => b.estimatedValue - a.estimatedValue), totalValue: inventory.reduce((a, b) => a + b.estimatedValue, 0) },
       `Discovered ${inventory.length} hidden sponsorship opportunities worth $${inventory.reduce((a, b) => a + b.estimatedValue, 0).toLocaleString()}.`,
       inventory.slice(0, 3).map(s => `${s.brand}: $${s.estimatedValue.toLocaleString()} (${s.fit}% fit)`),
@@ -469,7 +469,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f47: async () => {
-    const positions = Array.from({ length: 4 }, (_, _i) => ({ position: pick(['intro', 'mid-roll', 'description', 'pinned']), ctr: r(1, 8), conversion: r(0.5, 5) }));
+    const positions = Array.from({ length: 4 }, (_, i) => ({ position: pick(['intro', 'mid-roll', 'description', 'pinned']), ctr: r(1, 8), conversion: r(0.5, 5) }));
     return ok('f47', 'Affiliate Link Placement Optimizer', { positions: positions.sort((a, b) => b.ctr - a.ctr), bestPosition: positions[0].position },
       `Optimal link position: ${positions[0].position} (${positions[0].ctr.toFixed(1)}% CTR).`,
       positions.map(p => `${p.position}: ${p.ctr.toFixed(1)}% CTR, ${p.conversion.toFixed(1)}% conversion`),
@@ -477,7 +477,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f48: async () => {
-    const leaks = Array.from({ length: 3 }, (_, _i) => ({ source: pick(['Broken affiliate links', 'Missed sponsorship', 'Unoptimized CTA', 'Poor link placement']), value: ri(100, 2000) }));
+    const leaks = Array.from({ length: 3 }, (_, i) => ({ source: pick(['Broken affiliate links', 'Missed sponsorship', 'Unoptimized CTA', 'Poor link placement']), value: ri(100, 2000) }));
     const totalLeak = leaks.reduce((a, b) => a + b.value, 0);
     return ok('f48', 'Revenue Leak Detection', { leaks, totalLeak, leakPercentage: r(5, 25) },
       `Detected $${totalLeak.toLocaleString()} in potential revenue leaks across ${leaks.length} areas.`,
@@ -497,7 +497,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f50: async () => {
-    const alerts = Array.from({ length: 3 }, (_, _i) => ({ type: pick(['spike', 'drop', 'anomaly']), platform: pick(['YouTube', 'Instagram', 'TikTok']), change: ri(10, 50) }));
+    const alerts = Array.from({ length: 3 }, (_, i) => ({ type: pick(['spike', 'drop', 'anomaly']), platform: pick(['YouTube', 'Instagram', 'TikTok']), change: ri(10, 50) }));
     return ok('f50', 'Engagement Velocity Alerts', { alerts, threshold: 20, totalAlerts: alerts.length },
       `${alerts.length} engagement velocity alert(s) triggered.`,
       alerts.map(a => `${a.type} on ${a.platform}: ${a.change}% ${a.type === 'spike' ? 'increase' : 'decrease'}`),
@@ -505,7 +505,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f51: async () => {
-    const hooks = Array.from({ length: 6 }, (_, _i) => ({ content: `Hook template ${i + 1}: ${pick(['"I tried X for 30 days..."', '"Nobody talks about this..."', '"Stop doing X if you want Y..."', '"The truth about X that no one tells you"', '"X changed everything for me"', '"You won\'t believe what happened when..."'])}`, performance: ri(70, 98), category: pick(['Challenge', 'Revelation', 'Warning', 'How-To', 'Story']) }));
+    const hooks = Array.from({ length: 6 }, (_, i) => ({ content: `Hook template ${i + 1}: ${pick(['"I tried X for 30 days..."', '"Nobody talks about this..."', '"Stop doing X if you want Y..."', '"The truth about X that no one tells you"', '"X changed everything for me"', '"You won\'t believe what happened when..."'])}`, performance: ri(70, 98), category: pick(['Challenge', 'Revelation', 'Warning', 'How-To', 'Story']) }));
     return ok('f51', 'The Hook Library', { hooks: hooks.sort((a, b) => b.performance - a.performance), totalTemplates: hooks.length },
       `Top hook: "${hooks[0].content}" (${hooks[0].performance}% performance).`,
       hooks.slice(0, 3).map(h => `"${h.content.substring(0, 40)}...": ${h.performance}%`),
@@ -513,7 +513,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f52: async () => {
-    const spend = Array.from({ length: 3 }, (_, _i) => ({ competitor: pick(['CompA', 'CompB', 'CompC']), estimatedSpend: ri(500, 10000), platform: pick(['YouTube Ads', 'Instagram Ads', 'TikTok Ads']) }));
+    const spend = Array.from({ length: 3 }, (_, i) => ({ competitor: pick(['CompA', 'CompB', 'CompC']), estimatedSpend: ri(500, 10000), platform: pick(['YouTube Ads', 'Instagram Ads', 'TikTok Ads']) }));
     return ok('f52', 'Ad-Spend Transparency', { spend: spend.sort((a, b) => b.estimatedSpend - a.estimatedSpend), yourSpend: ri(0, 2000) },
       `Top competitor ad spend: $${spend[0].estimatedSpend}/month.`,
       spend.map(s => `${s.competitor}: ~$${s.estimatedSpend}/month on ${s.platform}`),
@@ -529,7 +529,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f54: async () => {
-    const strategies = Array.from({ length: 3 }, (_, _i) => ({ action: pick(['Counter-post', 'Debunk', 'Response video', 'Collaboration']), effectiveness: ri(60, 95), timeframe: `${ri(1, 7)} days` }));
+    const strategies = Array.from({ length: 3 }, (_, i) => ({ action: pick(['Counter-post', 'Debunk', 'Response video', 'Collaboration']), effectiveness: ri(60, 95), timeframe: `${ri(1, 7)} days` }));
     return ok('f54', 'Content Counter-Strike Logic', { strategies: strategies.sort((a, b) => b.effectiveness - a.effectiveness) },
       `Best counter strategy: ${strategies[0].action} (${strategies[0].effectiveness}% effectiveness).`,
       strategies.map(s => `${s.action}: ${s.effectiveness}% effective (${s.timeframe})`),
@@ -537,7 +537,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f55: async () => {
-    const migrations = Array.from({ length: 4 }, (_, _i) => ({ from: pick(['CompetitorA', 'CompetitorB']), to: 'You', count: ri(50, 500), trend: pick(['increasing', 'stable', 'decreasing']) }));
+    const migrations = Array.from({ length: 4 }, (_, i) => ({ from: pick(['CompetitorA', 'CompetitorB']), to: 'You', count: ri(50, 500), trend: pick(['increasing', 'stable', 'decreasing']) }));
     return ok('f55', 'Follower Migration Tracker', { migrations, totalInbound: ri(200, 2000), totalOutbound: ri(100, 800) },
       `Net follower migration: +${ri(200, 2000) - ri(100, 800)} this period.`,
       migrations.slice(0, 2).map(m => `${m.count} followers moved from ${m.from} to you (${m.trend})`),
@@ -545,7 +545,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f56: async () => {
-    const niches = Array.from({ length: 3 }, (_, _i) => ({ niche: pick(['Tech', 'Lifestyle', 'Education', 'Finance']), overlap: ri(20, 60), opportunity: ri(30, 90) }));
+    const niches = Array.from({ length: 3 }, (_, i) => ({ niche: pick(['Tech', 'Lifestyle', 'Education', 'Finance']), overlap: ri(20, 60), opportunity: ri(30, 90) }));
     return ok('f56', 'Cross-Niche Rivalry Map', { niches, primaryRival: pick(['CreatorAlpha', 'StudioBeta', 'ContentGamma']) },
       `Primary cross-niche rival: ${pick(['CreatorAlpha', 'StudioBeta'])}. Top opportunity: ${niches[0].niche}.`,
       niches.map(n => `${n.niche}: ${n.overlap}% niche overlap, ${n.opportunity}% opportunity`),
@@ -553,7 +553,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f57: async () => {
-    const periods = Array.from({ length: 4 }, (_, _i) => ({ period: `Q${i + 1}`, subscribers: ri(1000, 30000), growth: r(2, 15), avgViews: ri(5000, 100000) }));
+    const periods = Array.from({ length: 4 }, (_, i) => ({ period: `Q${i + 1}`, subscribers: ri(1000, 30000), growth: r(2, 15), avgViews: ri(5000, 100000) }));
     return ok('f57', 'Historical Growth Auditing', { periods, overallGrowth: r(20, 100), bestPeriod: periods.sort((a, b) => b.growth - a.growth)[0].period },
       `Best growth period: ${periods.sort((a, b) => b.growth - a.growth)[0].period} with ${periods.sort((a, b) => b.growth - a.growth)[0].growth}% growth.`,
       periods.map(p => `${p.period}: +${p.subscribers.toLocaleString()} subscribers (${p.growth}%)`),
@@ -561,7 +561,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f58: async () => {
-    const platforms = Array.from({ length: 3 }, (_, _i) => ({ platform: pick(['YouTube', 'Instagram', 'TikTok']), avgVisualScore: ri(60, 95), contentTypes: pick(['Reels', 'Shorts', 'Carousels', 'Stories']) }));
+    const platforms = Array.from({ length: 3 }, (_, i) => ({ platform: pick(['YouTube', 'Instagram', 'TikTok']), avgVisualScore: ri(60, 95), contentTypes: pick(['Reels', 'Shorts', 'Carousels', 'Stories']) }));
     return ok('f58', 'Multi-Modal Vision Scout', { platforms, visualTrends: ['Minimalist thumbnails', 'High-contrast text', 'Face-focused covers'] },
       `Visual analysis across ${platforms.length} platform(s) complete.`,
       platforms.map(p => `${p.platform}: avg visual score ${p.avgVisualScore}%`),
@@ -569,7 +569,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f59: async () => {
-    const inheritors = Array.from({ length: 3 }, (_, _i) => ({ creator: pick(['Inactive Creator A', 'Gone Creator B']), followers: ri(10000, 200000), lastActive: new Date(Date.now() - ri(30, 365) * 86400000).toISOString(), opportunity: ri(50, 95) }));
+    const inheritors = Array.from({ length: 3 }, (_, i) => ({ creator: pick(['Inactive Creator A', 'Gone Creator B']), followers: ri(10000, 200000), lastActive: new Date(Date.now() - ri(30, 365) * 86400000).toISOString(), opportunity: ri(50, 95) }));
     return ok('f59', 'Dead Creator Inheritance Protocol', { inheritors: inheritors.sort((a, b) => b.opportunity - a.opportunity), totalOpportunity: inheritors.reduce((a, b) => a + b.followers, 0) },
       `Found ${inheritors.length} inactive creator audience(s) totaling ${inheritors.reduce((a, b) => a + b.followers, 0).toLocaleString()} potential followers.`,
       inheritors.map(i => `${i.creator}: ${i.followers.toLocaleString()} followers (${i.opportunity}% opportunity)`),
@@ -585,7 +585,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f61: async () => {
-    const expressions = Array.from({ length: 3 }, (_, _i) => ({ competitor: pick(['CompA', 'CompB']), emotion: pick(['Surprise', 'Joy', 'Curiosity']), effectiveness: ri(60, 95), thumbnailStyle: pick(['Close-up face', 'Wide shot', 'Split frame']) }));
+    const expressions = Array.from({ length: 3 }, (_, i) => ({ competitor: pick(['CompA', 'CompB']), emotion: pick(['Surprise', 'Joy', 'Curiosity']), effectiveness: ri(60, 95), thumbnailStyle: pick(['Close-up face', 'Wide shot', 'Split frame']) }));
     return ok('f61', 'Competitor Thumbnail Face Micro-Expression Analyzer', { expressions, topEmotion: expressions.sort((a, b) => b.effectiveness - a.effectiveness)[0].emotion },
       `Top performing expression: ${expressions.sort((a, b) => b.effectiveness - a.effectiveness)[0].emotion} (${expressions.sort((a, b) => b.effectiveness - a.effectiveness)[0].effectiveness}% effectiveness).`,
       expressions.map(e => `${e.competitor}: ${e.emotion} expression (${e.effectiveness}%)`),
@@ -593,7 +593,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f62: async () => {
-    const matches = Array.from({ length: 3 }, (_, _i) => ({ creator: pick(['SmallCreator', 'MidCreator', 'NicheExpert']), synergy: ri(60, 95), audienceOverlap: ri(10, 40), mutualBenefit: 'high' }));
+    const matches = Array.from({ length: 3 }, (_, i) => ({ creator: pick(['SmallCreator', 'MidCreator', 'NicheExpert']), synergy: ri(60, 95), audienceOverlap: ri(10, 40), mutualBenefit: 'high' }));
     return ok('f62', 'Collaboration Matchmaker (Asymmetric)', { matches: matches.sort((a, b) => b.synergy - a.synergy) },
       `Best asymmetric match: ${matches[0].creator} (${matches[0].synergy}% synergy).`,
       matches.map(m => `${m.creator}: ${m.synergy}% synergy, ${m.audienceOverlap}% overlap`),
@@ -601,7 +601,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f63: async () => {
-    const mechanisms = Array.from({ length: 4 }, (_, _i) => ({ name: pick(['Emotional hook', 'Share trigger', 'Loop factor', 'Trend timing']), impact: ri(50, 95), reproducibility: ri(40, 80) }));
+    const mechanisms = Array.from({ length: 4 }, (_, i) => ({ name: pick(['Emotional hook', 'Share trigger', 'Loop factor', 'Trend timing']), impact: ri(50, 95), reproducibility: ri(40, 80) }));
     return ok('f63', 'Viral Mechanism Reverse-Engineer', { mechanisms: mechanisms.sort((a, b) => b.impact - a.impact), viralContent: ri(5, 20) },
       `Analyzed ${ri(5, 20)} viral content(s). Top mechanism: ${mechanisms[0].name} (${mechanisms[0].impact}% impact).`,
       mechanisms.map(m => `${m.name}: ${m.impact}% impact (${m.reproducibility}% reproducible)`),
@@ -609,7 +609,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f64: async () => {
-    const gaps = Array.from({ length: 5 }, (_, _i) => ({ keyword: `keyword_${i + 1}`, yourRank: ri(8, 50), competitorRank: ri(1, 10), searchVolume: ri(1000, 20000), difficulty: pick(['easy', 'medium', 'hard']) }));
+    const gaps = Array.from({ length: 5 }, (_, i) => ({ keyword: `keyword_${i + 1}`, yourRank: ri(8, 50), competitorRank: ri(1, 10), searchVolume: ri(1000, 20000), difficulty: pick(['easy', 'medium', 'hard']) }));
     return ok('f64', 'Competitive Keyword Gap Analysis', { gaps: gaps.sort((a, b) => a.competitorRank - b.competitorRank) },
       `Found ${gaps.length} keyword gap(s). Top opportunity: "${gaps[0].keyword}".`,
       gaps.slice(0, 3).map(g => `"${g.keyword}": You rank #${g.yourRank}, competitor #${g.competitorRank}`),
@@ -646,7 +646,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f68: async () => {
-    const queue = Array.from({ length: 8 }, (_, _i) => ({ platform: pick(['YouTube', 'Instagram', 'TikTok']), action: pick(['Reply', 'Heart', 'Share', 'Comment']), priority: i + 1, engagement: ri(1, 100) }));
+    const queue = Array.from({ length: 8 }, (_, i) => ({ platform: pick(['YouTube', 'Instagram', 'TikTok']), action: pick(['Reply', 'Heart', 'Share', 'Comment']), priority: i + 1, engagement: ri(1, 100) }));
     return ok('f68', 'Engagement Priority Queue', { queue: queue.slice(0, 5), totalPending: queue.length, estimatedTime: `${ri(10, 45)} min` },
       `${queue.length} engagement action(s) queued. Estimated time: ${ri(10, 45)} minutes.`,
       ['High-priority items are from your most engaged followers', 'Batch processing will save time'],
@@ -790,7 +790,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f85: async () => {
-    const heatmap = Array.from({ length: 10 }, (_, _i) => ({ timestamp: `${i * 10}%`, retention: r(40, 100) }));
+    const heatmap = Array.from({ length: 10 }, (_, i) => ({ timestamp: `${i * 10}%`, retention: r(40, 100) }));
     return ok('f85', 'Predictive Retention Heatmaps', { heatmap, avgRetention: r(40, 65), dropoffPoint: `${ri(20, 40)}%` },
       `Average predicted retention: ${Math.round(r(40, 65))}%. Major drop-off at ${ri(20, 40)}%.`,
       [`Retention ${r(40, 65) > 50 ? 'is above' : 'is below'} platform average`, 'Early hook is critical for retention'],
@@ -838,7 +838,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f91: async () => {
-    const variants = Array.from({ length: 2 }, (_, _i) => ({ variant: `Variant ${String.fromCharCode(65 + i)}`, predictedCTR: r(4, 12), confidence: r(55, 85) }));
+    const variants = Array.from({ length: 2 }, (_, i) => ({ variant: `Variant ${String.fromCharCode(65 + i)}`, predictedCTR: r(4, 12), confidence: r(55, 85) }));
     const winner = variants.sort((a, b) => b.predictedCTR - a.predictedCTR)[0];
     return ok('f91', 'Thumbnail A/B Test Predictor', { variants, winner: winner.variant, confidence: winner.confidence, ctrDifference: Math.abs(variants[0].predictedCTR - variants[1].predictedCTR) },
       `Predicted winner: ${winner.variant} (${winner.predictedCTR.toFixed(1)}% CTR).`,
@@ -864,7 +864,7 @@ const registry: Record<string, FeatureFn> = {
     const content = (p?.content as string) || 'content creation';
     try {
       const result = await aiService.recommendHashtags(content, 20);
-      const tags = result?.data?.hashtags || Array.from({ length: 15 }, (_, _i) => `hashtag${i + 1}`);
+      const tags = result?.data?.hashtags || Array.from({ length: 15 }, (_, i) => `hashtag${i + 1}`);
       return ok('f93', 'Hashtag/Keyword Extractor', { hashtags: tags, count: tags.length, relevance: r(70, 95) },
         `Extracted ${tags.length} hashtags with ${Math.round(r(70, 95))}% relevance.`,
         [`Top hashtags have ${ri(1000, 50000).toLocaleString()} avg. reach`, 'Mix of high-volume and niche hashtags recommended'],
@@ -885,7 +885,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f95: async () => {
-    const interrupts = Array.from({ length: 3 }, (_, _i) => ({ type: pick(['Visual flash', 'Sound effect', 'Text overlay', 'Scene change']), timing: `${ri(10, 80)}%`, impact: r(50, 95) }));
+    const interrupts = Array.from({ length: 3 }, (_, i) => ({ type: pick(['Visual flash', 'Sound effect', 'Text overlay', 'Scene change']), timing: `${ri(10, 80)}%`, impact: r(50, 95) }));
     return ok('f95', 'Visual Pattern Interrupt Generator', { interrupts, patternScore: r(60, 90), recommended: interrupts.sort((a, b) => b.impact - a.impact)[0].type },
       `Recommended pattern interrupt: ${interrupts.sort((a, b) => b.impact - a.impact)[0].type} at ${interrupts.sort((a, b) => b.impact - a.impact)[0].timing}.`,
       interrupts.map(i => `${i.type} at ${i.timing}: ${Math.round(i.impact)}% impact`),
@@ -893,7 +893,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f96: async () => {
-    const unuploaded = Array.from({ length: 3 }, (_, _i) => ({ title: `Unuploaded Content ${i + 1}`, potentialScore: ri(50, 95), reason: pick(['Timing issue', 'Quality concern', 'Brand mismatch']) }));
+    const unuploaded = Array.from({ length: 3 }, (_, i) => ({ title: `Unuploaded Content ${i + 1}`, potentialScore: ri(50, 95), reason: pick(['Timing issue', 'Quality concern', 'Brand mismatch']) }));
     return ok('f96', 'Quantum Content - The Unuploaded', { unuploaded, totalDrafts: ri(5, 20), estimatedLostRevenue: ri(100, 1000) },
       `Found ${unuploaded.length} unuploaded content piece(s) with high potential.`,
       unuploaded.map(u => `"${u.title}": ${u.potentialScore}% potential (${u.reason})`),
@@ -923,7 +923,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f99: async () => {
-    const times = Array.from({ length: 3 }, (_, _i) => ({ time: `${ri(5, 22)}:00`, day: pick(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']), score: ri(70, 98) }));
+    const times = Array.from({ length: 3 }, (_, i) => ({ time: `${ri(5, 22)}:00`, day: pick(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']), score: ri(70, 98) }));
     return ok('f99', 'Golden Hour Command', { optimalTimes: times.sort((a, b) => b.score - a.score), nextBestTime: times[0].time, timezone: 'WAT (GMT+1)' },
       `Best time to post: ${times[0].day} at ${times[0].time} (${times[0].score}% score).`,
       times.slice(0, 3).map(t => `${t.day} ${t.time}: ${t.score}% engagement potential`),
@@ -932,7 +932,7 @@ const registry: Record<string, FeatureFn> = {
 
   f100: async (p) => {
     const topic = (p?.topic as string) || 'content creation';
-    const keywords = Array.from({ length: 10 }, (_, _i) => ({ keyword: `${topic} keyword ${i + 1}`, volume: ri(100, 50000), difficulty: r(10, 90) }));
+    const keywords = Array.from({ length: 10 }, (_, i) => ({ keyword: `${topic} keyword ${i + 1}`, volume: ri(100, 50000), difficulty: r(10, 90) }));
     return ok('f100', 'Keyword Planner and Generator', { keywords: keywords.sort((a, b) => b.volume - a.volume), topic },
       `Generated ${keywords.length} keywords for "${topic}".`,
       keywords.slice(0, 3).map(k => `"${k.keyword}": ${k.volume.toLocaleString()} searches/mo (${Math.round(k.difficulty)}% difficulty)`),
@@ -956,7 +956,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f103: async () => {
-    const times = Array.from({ length: 5 }, (_, _i) => ({ time: `${String(i + 6).padStart(2, '0')}:00`, day: pick(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']), engagement: ri(50, 100) }));
+    const times = Array.from({ length: 5 }, (_, i) => ({ time: `${String(i + 6).padStart(2, '0')}:00`, day: pick(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']), engagement: ri(50, 100) }));
     return ok('f103', 'Best Time to Post Calculator', { times: times.sort((a, b) => b.engagement - a.engagement), best: times[0] },
       `Best time to post: ${times[0].day} at ${times[0].time} (${times[0].engagement}% engagement).`,
       times.slice(0, 3).map(t => `${t.day} ${t.time}: ${t.engagement}%`),
@@ -973,7 +973,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f105: async () => {
-    const gaps = Array.from({ length: 5 }, (_, _i) => ({ topic: `Gap Topic ${i + 1}`, searchVolume: ri(1000, 30000), competition: pick(['low', 'medium', 'high']), yourCoverage: ri(0, 30) }));
+    const gaps = Array.from({ length: 5 }, (_, i) => ({ topic: `Gap Topic ${i + 1}`, searchVolume: ri(1000, 30000), competition: pick(['low', 'medium', 'high']), yourCoverage: ri(0, 30) }));
     return ok('f105', 'Content Gap Analyzer', { gaps: gaps.sort((a, b) => a.yourCoverage - b.yourCoverage), totalGaps: gaps.length },
       `Found ${gaps.length} content gap(s). Biggest opportunity: "${gaps[0].topic}".`,
       gaps.slice(0, 3).map(g => `"${g.topic}": ${g.competition} competition, ${g.yourCoverage}% coverage`),
@@ -989,7 +989,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f107: async () => {
-    const platforms = Array.from({ length: 3 }, (_, _i) => ({ platform: pick(['YouTube', 'TikTok', 'Instagram', 'Twitter']), opportunity: ri(40, 95), effort: pick(['low', 'medium', 'high']), growth: r(10, 50) }));
+    const platforms = Array.from({ length: 3 }, (_, i) => ({ platform: pick(['YouTube', 'TikTok', 'Instagram', 'Twitter']), opportunity: ri(40, 95), effort: pick(['low', 'medium', 'high']), growth: r(10, 50) }));
     return ok('f107', 'Platform Migration Advisor', { platforms: platforms.sort((a, b) => b.opportunity - a.opportunity), recommendation: platforms[0].platform },
       `Recommended migration target: ${platforms[0].platform} (${platforms[0].opportunity}% opportunity).`,
       platforms.map(p => `${p.platform}: ${p.opportunity}% opportunity (${p.effort} effort)`),
@@ -1017,7 +1017,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f110: async () => {
-    const services = Array.from({ length: 4 }, (_, _i) => ({ name: pick(['YouTube API', 'Instagram API', 'TikTok API', 'Twitter API']), status: pick(['healthy', 'healthy', 'healthy', 'degraded']), latency: ri(50, 500) }));
+    const services = Array.from({ length: 4 }, (_, i) => ({ name: pick(['YouTube API', 'Instagram API', 'TikTok API', 'Twitter API']), status: pick(['healthy', 'healthy', 'healthy', 'degraded']), latency: ri(50, 500) }));
     return ok('f110', 'API Heartbeat Monitor', { services, overall: r(90, 100) },
       `API health: ${Math.round(r(90, 100))}%. All services ${services.some(s => s.status === 'degraded') ? 'mostly' : 'fully'} operational.`,
       services.map(s => `${s.name}: ${s.status} (${s.latency}ms)`),
@@ -1084,7 +1084,7 @@ const registry: Record<string, FeatureFn> = {
   // ═══════════════════════════════════════════════════════════════════════════
 
   f118: async () => {
-    const scheduled = Array.from({ length: ri(3, 8) }, (_, _i) => ({ date: new Date(Date.now() + (i + 1) * 86400000).toISOString(), platform: pick(['YouTube', 'Instagram', 'TikTok', 'Twitter', 'LinkedIn']), title: `Scheduled Post ${i + 1}`, status: 'scheduled' }));
+    const scheduled = Array.from({ length: ri(3, 8) }, (_, i) => ({ date: new Date(Date.now() + (i + 1) * 86400000).toISOString(), platform: pick(['YouTube', 'Instagram', 'TikTok', 'Twitter', 'LinkedIn']), title: `Scheduled Post ${i + 1}`, status: 'scheduled' }));
     return ok('f118', 'Content Calendar and Scheduler', { scheduled, platforms: ['YouTube', 'Instagram', 'TikTok', 'Twitter', 'LinkedIn'], nextScheduled: scheduled[0].date },
       `${scheduled.length} post(s) scheduled across ${new Set(scheduled.map(s => s.platform)).size} platform(s).`,
       [`Next post: ${scheduled[0].title} on ${scheduled[0].platform}`, `${new Set(scheduled.map(s => s.platform)).size} platforms connected`],
@@ -1099,7 +1099,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f120: async () => {
-    const codes = Array.from({ length: 3 }, (_, _i) => ({ code: `VLCTQ-${Math.random().toString(36).substr(2, 6).toUpperCase()}`, product: `Product ${i + 1}`, clicks: ri(10, 500), conversions: ri(1, 50) }));
+    const codes = Array.from({ length: 3 }, (_, i) => ({ code: `VLCTQ-${Math.random().toString(36).substr(2, 6).toUpperCase()}`, product: `Product ${i + 1}`, clicks: ri(10, 500), conversions: ri(1, 50) }));
     return ok('f120', 'Affiliate Code Generator + Tracker', { codes, totalClicks: codes.reduce((a, b) => a + b.clicks, 0), totalConversions: codes.reduce((a, b) => a + b.conversions, 0) },
       `${codes.length} affiliate code(s) active. ${codes.reduce((a, b) => a + b.clicks, 0)} total clicks.`,
       codes.map(c => `${c.code}: ${c.clicks} clicks, ${c.conversions} conversions`),
@@ -1139,7 +1139,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f125: async () => {
-    const seats = Array.from({ length: ri(2, 5) }, (_, _i) => ({ name: `Team Member ${i + 1}`, role: pick(['Admin', 'Editor', 'Viewer']), lastActive: new Date().toISOString() }));
+    const seats = Array.from({ length: ri(2, 5) }, (_, i) => ({ name: `Team Member ${i + 1}`, role: pick(['Admin', 'Editor', 'Viewer']), lastActive: new Date().toISOString() }));
     return ok('f125', 'Team/Agency Multi-Seat', { seats, maxSeats: 10, roles: ['Admin', 'Editor', 'Viewer'] },
       `${seats.length} team member(s) active. ${Math.max(0, 10 - seats.length)} seat(s) remaining.`,
       ['Role-based access control is active', 'Activity logs are maintained for all seats'],
@@ -1147,7 +1147,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f126: async () => {
-    const campaigns = Array.from({ length: ri(2, 4) }, (_, _i) => ({ name: `Campaign ${i + 1}`, posts: ri(3, 10), engagement: ri(5, 20), revenue: ri(100, 5000) }));
+    const campaigns = Array.from({ length: ri(2, 4) }, (_, i) => ({ name: `Campaign ${i + 1}`, posts: ri(3, 10), engagement: ri(5, 20), revenue: ri(100, 5000) }));
     return ok('f126', 'Campaign Management', { campaigns, totalPosts: campaigns.reduce((a, b) => a + b.posts, 0), totalRevenue: campaigns.reduce((a, b) => a + b.revenue, 0) },
       `${campaigns.length} campaign(s) active. ${campaigns.reduce((a, b) => a + b.posts, 0)} posts total.`,
       campaigns.map(c => `${c.name}: ${c.posts} posts, ${c.engagement}% avg engagement`),
@@ -1162,7 +1162,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f128: async () => {
-    const actions = Array.from({ length: 5 }, (_, _i) => ({ type: pick(['Approve', 'Reply', 'Block', 'Like', 'Share']), count: ri(5, 50), platform: pick(['YouTube', 'Instagram', 'TikTok']) }));
+    const actions = Array.from({ length: 5 }, (_, i) => ({ type: pick(['Approve', 'Reply', 'Block', 'Like', 'Share']), count: ri(5, 50), platform: pick(['YouTube', 'Instagram', 'TikTok']) }));
     const total = actions.reduce((a, b) => a + b.count, 0);
     return ok('f128', 'Bulk Actions', { actions, totalActions: total, vqtSaved: Math.floor(total * 0.3) },
       `${total} bulk action(s) processed. Saved ${Math.floor(total * 0.3)} VQT with bulk pricing.`,
@@ -1171,7 +1171,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f129: async () => {
-    const lists = Array.from({ length: 3 }, (_, _i) => ({ name: pick(['Tech Hashtags', 'Lifestyle Tags', 'Niche Keywords']), count: ri(10, 30), performance: r(50, 90) }));
+    const lists = Array.from({ length: 3 }, (_, i) => ({ name: pick(['Tech Hashtags', 'Lifestyle Tags', 'Niche Keywords']), count: ri(10, 30), performance: r(50, 90) }));
     return ok('f129', 'Hashtag Bank/Saved Lists', { lists, totalHashtags: lists.reduce((a, b) => a + b.count, 0), topList: lists.sort((a, b) => b.performance - a.performance)[0].name },
       `${lists.length} saved list(s) with ${lists.reduce((a, b) => a + b.count, 0)} hashtags.`,
       lists.map(l => `${l.name}: ${l.count} hashtags (${Math.round(l.performance)}% avg performance)`),
@@ -1179,7 +1179,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f130: async () => {
-    const alerts = Array.from({ length: ri(1, 4) }, (_, _i) => ({ competitor: pick(['CompA', 'CompB', 'CompC']), platform: pick(['YouTube', 'Instagram', 'TikTok']), time: new Date(Date.now() - ri(0, 48) * 3600000).toISOString(), type: pick(['New Post', 'Story Update', 'Going Live']) }));
+    const alerts = Array.from({ length: ri(1, 4) }, (_, i) => ({ competitor: pick(['CompA', 'CompB', 'CompC']), platform: pick(['YouTube', 'Instagram', 'TikTok']), time: new Date(Date.now() - ri(0, 48) * 3600000).toISOString(), type: pick(['New Post', 'Story Update', 'Going Live']) }));
     return ok('f130', 'Competitor Alert System', { alerts, monitoring: ri(3, 8), channels: ['Push', 'Email'] },
       `${alerts.length} new competitor alert(s). Monitoring ${ri(3, 8)} competitor(s).`,
       alerts.map(a => `${a.competitor} posted on ${a.platform}: ${a.type}`),
@@ -1219,7 +1219,7 @@ const registry: Record<string, FeatureFn> = {
   },
 
   f135: async () => {
-    const detections = Array.from({ length: ri(1, 4) }, (_, _i) => ({ issue: pick(['Engagement drop', 'Shadow ban risk', 'Content opportunity', 'Revenue optimization']), confidence: r(60, 95), suggestedAction: pick(['Review analytics', 'Check shield status', 'Create content', 'Update affiliate links']) }));
+    const detections = Array.from({ length: ri(1, 4) }, (_, i) => ({ issue: pick(['Engagement drop', 'Shadow ban risk', 'Content opportunity', 'Revenue optimization']), confidence: r(60, 95), suggestedAction: pick(['Review analytics', 'Check shield status', 'Create content', 'Update affiliate links']) }));
     return ok('f135', 'VEX Proactive Intelligence', { detections, isProactive: true, lastScan: new Date().toISOString() },
       `VEX detected ${detections.length} actionable insight(s).`,
       detections.map(d => `${d.issue}: ${Math.round(d.confidence)}% confidence - ${d.suggestedAction}`),

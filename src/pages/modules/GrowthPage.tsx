@@ -231,16 +231,16 @@ export function GrowthPage() {
                   size="sm"
                   className="w-full bg-[#10B981] hover:bg-[#10B981]/90 text-white gap-2"
                   onClick={() => handleRunFeature(feature.id, feature.vqtCost, feature.name)}
-                  disabled={isRunning}
+                  disabled={isRunning(feature.id)}
                 >
-                  {isRunning && expandedFeature === feature.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-                  {isRunning && expandedFeature === feature.id ? 'Running...' : 'Run'}
+                  {isRunning(feature.id) && expandedFeature === feature.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+                  {isRunning(feature.id) && expandedFeature === feature.id ? 'Running...' : 'Run'}
                 </Button>
                 {result && isExpanded && (
                   <div className="mt-4 space-y-3">
                     <div className="flex items-center gap-2 text-sm font-medium text-[#0B0F19]"><CheckCircle className="w-4 h-4 text-[#00D4AA]" />{result.summary}</div>
-                    {result.insights.length > 0 && <div className="space-y-1">{result.insights.map((insight, i) => <p key={i} className="text-xs text-[#6B7280] flex items-start gap-1.5"><Lightbulb className="w-3 h-3 text-[#F59E0B] mt-0.5 flex-shrink-0" />{insight}</p>)}</div>}
-                    {result.recommendations.length > 0 && <div className="space-y-1">{result.recommendations.map((rec, i) => <p key={i} className="text-xs text-[#6B7280] flex items-start gap-1.5"><Sparkles className="w-3 h-3 text-[#00D4AA] mt-0.5 flex-shrink-0" />{rec}</p>)}</div>}
+                    {result.insights.length > 0 && <div className="space-y-1">{result.insights.map((insight: string, i: number) => <p key={i} className="text-xs text-[#6B7280] flex items-start gap-1.5"><Lightbulb className="w-3 h-3 text-[#F59E0B] mt-0.5 flex-shrink-0" />{insight}</p>)}</div>}
+                    {result.recommendations.length > 0 && <div className="space-y-1">{result.recommendations.map((rec: string, i: number) => <p key={i} className="text-xs text-[#6B7280] flex items-start gap-1.5"><Sparkles className="w-3 h-3 text-[#00D4AA] mt-0.5 flex-shrink-0" />{rec}</p>)}</div>}
                   </div>
                 )}
               </div>
