@@ -254,7 +254,7 @@ export function WelcomePage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <Badge className="mb-4 bg-[#0B0F19] text-white border-none font-mono text-xs">
-              117 FEATURES
+              136 FEATURES
             </Badge>
             <h2 className="text-3xl lg:text-5xl font-bold text-[#0B0F19] mb-4">
               Eight modules. Infinite intelligence.

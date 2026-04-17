@@ -9,7 +9,7 @@ interface FeatureStore {
   getModuleById: (id: FeatureCategory) => FeatureModule | undefined;
 }
 
-// All 117 Features
+// All 136 Features
 const allFeatures: Feature[] = [
   // SHIELD (1-15)
   { id: 'f1', code: 'F1', name: 'Behavioral Bot Identification', description: 'Detect bots using behavioral patterns', vqtCost: 1, nairaEquivalent: 10, category: 'shield', isFree: false, isAvailable: true, icon: 'Bot' },
