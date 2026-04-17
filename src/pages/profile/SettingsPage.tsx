@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuthStore, useUIStore } from '@/stores';
+import { useAuthStore } from '@/stores';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +17,6 @@ import {
 
 export function SettingsPage() {
   const { user, toggleLiminalConsent, logout } = useAuthStore();
-  const { theme, toggleTheme } = useUIStore();
   const [notifications, setNotifications] = useState({
     email: true,
     push: true,
@@ -40,30 +39,6 @@ export function SettingsPage() {
         <h1 className="text-2xl font-bold text-[#0B0F19]">Settings</h1>
         <p className="text-sm text-[#6B7280]">Manage your preferences and account</p>
       </div>
-
-      {/* Appearance */}
-      <Card className="border-[#E5E7EB]">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-[#0B0F19]">Appearance</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-[#F6F7F9] flex items-center justify-center">
-                <Moon className="w-5 h-5 text-[#6B7280]" />
-              </div>
-              <div>
-                <p className="font-medium text-[#0B0F19]">Dark Mode</p>
-                <p className="text-sm text-[#6B7280]">Toggle between light and dark theme</p>
-              </div>
-            </div>
-            <Switch 
-              checked={theme === 'dark'} 
-              onCheckedChange={toggleTheme}
-            />
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Notifications */}
       <Card className="border-[#E5E7EB]">

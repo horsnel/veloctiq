@@ -6,15 +6,15 @@ interface UIStore {
   sidebarOpen: boolean;
   currentModule: string;
   notifications: Notification[];
-  theme: 'light' | 'dark';
+  theme: 'light'; /* Light mode only */
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
   setCurrentModule: (module: string) => void;
   addNotification: (notification: Omit<Notification, 'id' | 'timestamp'>) => void;
   markNotificationAsRead: (id: string) => void;
   clearNotifications: () => void;
-  setTheme: (theme: 'light' | 'dark') => void;
-  toggleTheme: () => void;
+  setTheme: () => void; /* No-op, light only */
+  toggleTheme: () => void; /* No-op, light only */
 }
 
 export const useUIStore = create<UIStore>()(
@@ -23,7 +23,7 @@ export const useUIStore = create<UIStore>()(
       sidebarOpen: true,
       currentModule: 'dashboard',
       notifications: [],
-      theme: 'light',
+      theme: 'light' as const,
 
       toggleSidebar: () => {
         set(state => ({ sidebarOpen: !state.sidebarOpen }));
@@ -60,15 +60,12 @@ export const useUIStore = create<UIStore>()(
         set({ notifications: [] });
       },
 
-      setTheme: (theme: 'light' | 'dark') => {
-        set({ theme });
-        document.documentElement.classList.toggle('dark', theme === 'dark');
+      setTheme: () => {
+        /* Light mode only - no-op */
       },
 
       toggleTheme: () => {
-        const newTheme = get().theme === 'light' ? 'dark' : 'light';
-        set({ theme: newTheme });
-        document.documentElement.classList.toggle('dark', newTheme === 'dark');
+        /* Light mode only - no-op */
       },
     }),
     {

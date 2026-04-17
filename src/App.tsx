@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore, useUIStore } from '@/stores';
 import { Toaster } from '@/components/ui/sonner';
@@ -76,12 +75,6 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
-  const { theme } = useUIStore();
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-  }, [theme]);
-
   return (
     <BrowserRouter>
       <Routes>

@@ -129,7 +129,7 @@ export function WelcomePage() {
             </div>
             <div className="flex items-center gap-3">
               <Link to="/login">
-                <Button variant="ghost" className="text-sm">Sign in</Button>
+                <Button variant="ghost" className="text-sm text-[#334155]">Sign in</Button>
               </Link>
               <Link to="/signup">
                 <Button className="bg-[#00D4AA] hover:bg-[#00D4AA]/90 text-white text-sm">
@@ -159,20 +159,20 @@ export function WelcomePage() {
                 <h1 className="text-4xl lg:text-6xl font-bold text-[#0B0F19] leading-[0.95] tracking-tight mb-6">
                   Your content.<br />
                   Their attention.<br />
-                  <span className="text-[#00D4AA]">One command center.</span>
+                  <span className="text-[#00D4AA]">One terminal.</span>
                 </h1>
                 <p className="text-lg text-[#6B7280] mb-8 max-w-md">
-                  Real-time protection • Audience intel • Revenue optimization
+                  Built for Nigerian creators. Pay in Naira, protect your audience, predict your growth.
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <Link to="/signup">
-                    <Button size="lg" className="bg-[#00D4AA] hover:bg-[#00D4AA]/90 text-white gap-2">
+                    <Button size="lg" className="bg-[#00D4AA] hover:bg-[#00D4AA]/90 text-white gap-2 shadow-[0_4px_20px_rgba(0,212,170,0.35)] hover:shadow-[0_4px_24px_rgba(0,212,170,0.5)] transition-all">
                       Enter the terminal
                       <ArrowRight className="w-4 h-4" />
                     </Button>
                   </Link>
                   <Link to="#pricing">
-                    <Button size="lg" variant="outline" className="border-[#E5E7EB]">
+                    <Button size="lg" variant="outline" className="border-[#CBD5E1] text-[#0B0F19]">
                       View pricing
                     </Button>
                   </Link>
@@ -184,7 +184,7 @@ export function WelcomePage() {
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-sm font-medium text-[#0B0F19]">Live Signals</span>
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-[#00D4AA] animate-pulse" />
+                    <div className="w-2 h-2 rounded-full bg-[#06B6D4] animate-pulse" />
                     <span className="text-xs text-[#6B7280]">Live</span>
                   </div>
                 </div>

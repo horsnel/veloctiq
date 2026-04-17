@@ -114,8 +114,8 @@ export function Sidebar() {
       {/* Logo */}
       <div className={cn('p-4 flex items-center', sidebarOpen ? 'justify-between' : 'justify-center')}>
         <Link to="/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#00D4AA] flex items-center justify-center">
-            <span className="text-white font-bold text-sm">V</span>
+          <div className="w-8 h-8 rounded-lg bg-white border border-[#E5E7EB] flex items-center justify-center">
+            <span className="font-bold text-sm text-[#0B0F19]">V</span>
           </div>
           {sidebarOpen && (
             <span className="font-semibold text-[#0B0F19] text-lg tracking-tight">VELOCTIQ</span>
@@ -219,8 +219,8 @@ export function Sidebar() {
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-[#E5E7EB] z-50 flex items-center justify-between px-4">
         <Link to="/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#00D4AA] flex items-center justify-center">
-            <span className="text-white font-bold text-sm">V</span>
+          <div className="w-8 h-8 rounded-lg bg-white border border-[#E5E7EB] flex items-center justify-center">
+            <span className="font-bold text-sm text-[#0B0F19]">V</span>
           </div>
           <span className="font-semibold text-[#0B0F19] text-lg">VELOCTIQ</span>
         </Link>
